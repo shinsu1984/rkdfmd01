@@ -812,7 +812,7 @@ function missionPhotoHtml(){
   PHOTO_CHALLENGES.forEach(c=>{
     const d=done[c.id];
     html+=`<div class="card"><div class="row-between"><h3 style="margin:0;">${c.icon} ${c.title}</h3><span class="tag green">+${c.points}점</span></div><p style="margin-top:6px;"><span class="tag blue" style="margin-right:6px;">${c.place}</span>${c.desc}</p>
-      ${d?`<img src="${d.img}" style="width:100%; border-radius:12px; margin-top:10px; border:1px solid var(--line);"><p style="color:var(--good); font-weight:700; margin-top:6px;">✅ 완료했어요!${d.aiFeedback?` <span style="color:var(--ink-soft); font-weight:400;">— 🤖 ${escapeHtml(d.aiFeedback)}</span>`:''}</p>`
+      ${d?`<div style="position:relative;"><img src="${d.img}" style="width:100%; border-radius:12px; margin-top:10px; border:1px solid var(--line);"><button class="pdelete" onclick="retakePhotoChallenge('${c.id}')" title="다시 찍기">✕</button></div><p style="color:var(--good); font-weight:700; margin-top:6px;">✅ 완료했어요!${d.aiFeedback?` <span style="color:var(--ink-soft); font-weight:400;">— 🤖 ${escapeHtml(d.aiFeedback)}</span>`:''}</p><button class="btn ghost block sm" style="margin-top:4px;" onclick="retakePhotoChallenge('${c.id}')">🔄 잘못 올렸어요, 다시 찍기</button>`
         :`<label class="upload-box" style="display:block; margin-top:10px;" id="upl-${c.id}">📷 사진을 선택하세요<input type="file" accept="image/*" capture="environment" style="display:none" onchange="completePhotoChallenge('${c.id}', this)"></label>`}</div>`;
   });
   return html;
@@ -845,6 +845,11 @@ async function completePhotoChallenge(id, input){
     const d=getPhotoChallenges(); d[id]={img:dataUrl, ts:Date.now()}; lsSet('photo_challenges', d);
     toast('미션 완료! 🎉'); celebrate(); renderAll(); syncMyScore();
   }catch(e){ toast('사진을 불러오지 못했어요. 다른 사진으로 시도해주세요.'); if(box) box.textContent='📷 사진을 선택하세요'; }
+}
+function retakePhotoChallenge(id){
+  if(!confirm('이 미션 사진을 지우고 다시 찍을까요?')) return;
+  const d=getPhotoChallenges(); delete d[id]; lsSet('photo_challenges', d);
+  toast('삭제했어요. 다시 찍어보세요!'); renderAll(); syncMyScore();
 }
 const GEMINI_MODEL = 'gemini-2.5-flash'; // 다른 모델을 쓰고 싶으면 이 이름만 바꾸면 돼요 (예: 'gemini-2.0-flash')
 async function judgePhotoWithAI(challenge, dataUrl, apiKey){
