@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e2a4a">
+<title>우리 가족 강릉 겨울여행</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9D%84%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --navy-900:#0a1f38; --navy-800:#123a63; --navy-700:#1c5288;
+  --brass:#ff6f81; --brass-light:#ffa9b6; --brass-deep:#e14d64;
+  --parchment:#f3f8fc; --paper:#ffffff; --ink:#132338; --ink-soft:#5b6d85; --ink-faint:#9fb0c4;
+  --line:#e3edf5; --stamp:#ef4d6b; --good:#0fb28f;
+  --sun:#ff6f81; --mint:#4fd1d9;
+  --radius:20px; --radius-sm:14px;
+  --shadow:0 2px 4px rgba(10,20,40,.06), 0 16px 32px -18px rgba(10,20,40,.30);
+  --maxw:480px; --safe-b: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(640px 320px at 8% -80px, rgba(47,198,198,.14), transparent 62%),
+    radial-gradient(680px 360px at 100% 0%, rgba(255,178,56,.10), transparent 60%),
+    var(--parchment);
+  color:var(--ink); font-family:'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+  -webkit-font-smoothing:antialiased; min-height:100vh;
+}
+h1,h2,h3,.serif{font-family:'Gaegu','Pretendard',sans-serif; font-weight:700; letter-spacing:-.1px;}
+button{font-family:inherit;}
+#app{max-width:var(--maxw); margin:0 auto; min-height:100vh; background:var(--parchment); position:relative; display:flex; flex-direction:column;}
+.btn, .pill, .qtab, .quickbtn, .card, .stampcard{ transition:transform .12s, box-shadow .12s; }
+.btn:active, .pill:active, .qtab:active, .quickbtn:active, .stampcard:active, .qopt:active{ transform:scale(.96); }
+@keyframes popIn{ 0%{transform:scale(.5); opacity:0;} 60%{transform:scale(1.08); opacity:1;} 100%{transform:scale(1);} }
+@keyframes floatUp{ 0%{transform:translateY(0) scale(1); opacity:1;} 100%{transform:translateY(-46px) scale(1.3); opacity:0;} }
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important;} }
+
+/* 히어로 헤더 */
+.hero{ background:linear-gradient(150deg, var(--navy-900) 0%, var(--navy-700) 100%); color:#eef3fb; padding:calc(18px + env(safe-area-inset-top, 0px)) 20px 26px; position:relative; overflow:hidden; }
+.hero::before{ content:""; position:absolute; inset:0;
+  background:radial-gradient(420px 200px at 90% -40px, rgba(79,209,217,.22), transparent 60%),
+  radial-gradient(300px 180px at 6% 110%, rgba(255,111,129,.16), transparent 65%),
+  radial-gradient(rgba(255,255,255,.18) 1.4px, transparent 1.6px); background-size:auto, auto, 22px 22px; pointer-events:none; }
+.hero-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; position:relative;}
+.hero-title{ font-size:21px; font-weight:700; margin:0 0 2px; line-height:1.15;
+  background:linear-gradient(100deg, var(--mint), var(--brass-light) 70%); -webkit-background-clip:text; background-clip:text; color:transparent; letter-spacing:-.3px; }
+.hero-sub{margin:0; font-size:11.5px; color:#cfd9ea; opacity:.9;}
+.hero-theme{margin:2px 0 0; font-size:11px; color:var(--brass-light); opacity:.85;}
+.hero-date{display:inline-flex; align-items:center; gap:6px; margin-top:9px; padding:6px 12px;
+  background:rgba(255,255,255,.1); border:1px solid rgba(47,198,198,.4); border-radius:999px; font-size:11.5px; color:#eef6fb; font-weight:600;}
+.admin-btn{ background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.18); color:#eef3fb; border-radius:999px;
+  padding:6px 11px; font-size:11px; display:flex; align-items:center; gap:5px; cursor:pointer; white-space:nowrap;}
+.stamp-badge{ position:relative; min-width:84px; height:66px; border-radius:8px; border:none;
+  color:#4a1620; background:linear-gradient(180deg, #fff8ec, #ffe9b8); display:flex; flex-direction:column; align-items:center; justify-content:center;
+  transform:rotate(-5deg); flex-shrink:0; box-shadow:0 6px 14px -6px rgba(10,20,40,.35), 0 0 0 1px rgba(255,255,255,.5) inset; margin-top:16px;}
+.stamp-badge::before{content:"❄ ❄ ❄"; position:absolute; top:-9px; left:50%; transform:translateX(-50%); font-size:8px; color:rgba(74,22,32,.35); letter-spacing:3px; white-space:nowrap;}
+.stamp-badge b{font-family:'Gaegu','Pretendard',sans-serif; font-weight:700; font-size:19px; line-height:1; color:#4a1620;}
+.stamp-badge span{font-size:10.5px; letter-spacing:.02em; margin-top:3px; text-align:center; padding:0 6px; color:#7a3a44;}
+.ticket-notch{ height:14px; margin-top:-1px;
+  background:radial-gradient(circle, rgba(255,255,255,.9) 1.6px, transparent 1.7px) repeat-x; background-size:16px 14px; background-position:0 2px; opacity:.8;}
+
+/* 하단 메인 탭 */
+.bottomnav{ position:sticky; bottom:0; z-index:20; display:grid; grid-template-columns:repeat(6,1fr);
+  background:var(--paper); border-top:1px solid var(--line); padding:8px 2px calc(8px + var(--safe-b));
+  box-shadow:0 -6px 20px -14px rgba(10,20,40,.25);}
+.navbtn{ background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:4px 1px; color:var(--ink-faint); font-size:9.6px; cursor:pointer; border-radius:10px;}
+.navbtn .ic{font-size:17px; line-height:1;}
+.navbtn.active{color:var(--brass-deep); font-weight:700;}
+
+/* 가로 스크롤 필 */
+.subtabs{display:flex; gap:8px; overflow-x:auto; padding:14px 16px 4px; scrollbar-width:none;}
+.subtabs::-webkit-scrollbar{display:none;}
+.pill{ flex:0 0 auto; padding:9px 15px; border-radius:999px; border:1px solid var(--line); background:var(--paper);
+  color:var(--ink-soft); font-size:13px; font-weight:600; white-space:nowrap; cursor:pointer; display:flex; align-items:center; gap:5px;}
+.pill.active{background:var(--navy-800); border-color:var(--navy-800); color:#eef3fb;}
+
+/* 정보탭: 2줄 그리드 서브탭 */
+.subtabs-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; padding:14px 16px 4px;}
+.subtabs-grid .pill{ width:100%; white-space:normal; text-align:center; justify-content:center; padding:8px 3px; font-size:10.8px; line-height:1.25; }
+
+/* 미션탭: 2x2 그리드 */
+.quicktabs{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:14px 16px 4px;}
+.qtab{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:14px 8px; border:1.5px solid var(--line);
+  border-radius:14px; background:var(--paper); cursor:pointer; font-size:12.5px; font-weight:700; color:var(--ink-soft);}
+.qtab .ic{font-size:23px;}
+.qtab.active{background:var(--navy-800); border-color:var(--navy-800); color:#eef3fb;}
+
+/* 컨텐츠 카드 */
+main{flex:1; padding-bottom:24px;}
+.wrap{padding:16px;}
+.card{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); margin-bottom:14px;}
+.card h3{margin:0 0 10px; font-size:15.5px; display:flex; align-items:center; gap:7px;}
+.card p{margin:0; color:var(--ink-soft); font-size:13.5px; line-height:1.6;}
+.row-between{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.dashed{border:none; border-top:1.5px dashed var(--line); margin:12px 0;}
+.tag{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; padding:4px 9px; border-radius:999px; background:#fff0d2; color:#b5660c;}
+.tag.green{background:#e0f7f0; color:#0d8a6d;}
+.tag.blue{background:#e2f0ff; color:#1c5288;}
+.btn{border:none; border-radius:14px; padding:12px 16px; font-size:14px; font-weight:700; cursor:pointer; background:var(--navy-800); color:#eef3fb;}
+.btn.gold{background:linear-gradient(120deg, var(--brass), var(--brass-deep)); color:#3a2405; box-shadow:0 8px 18px -8px rgba(226,137,46,.45);}
+.btn.ghost{background:transparent; border:1.5px solid var(--line); color:var(--ink); font-weight:600;}
+.btn.block{width:100%;}
+.btn.sm{padding:8px 12px; font-size:12.5px; border-radius:9px;}
+input[type=text], input[type=number], input[type=tel], input[type=password], textarea, select {
+  width:100%; border:1.5px solid var(--line); border-radius:11px; padding:11px 13px; font-size:14px; background:var(--paper); color:var(--ink); font-family:inherit;}
+textarea{resize:vertical;}
+label.field{display:block; font-size:12px; color:var(--ink-soft); margin:0 0 6px; font-weight:600;}
+
+.stats{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;}
+.stat{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:16px 10px; text-align:center; box-shadow:var(--shadow);}
+.stat b{display:block; font-family:'Gaegu','Pretendard',sans-serif; font-weight:700; font-size:25px; color:var(--navy-800);}
+.stat span{font-size:11px; color:var(--ink-soft);}
+
+/* 빠른실행 아이콘 */
+.quickgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.quickbtn{display:flex; flex-direction:column; align-items:center; gap:3px; padding:16px 6px; border:1px solid var(--line); border-radius:14px; background:var(--paper); cursor:pointer;}
+.quickbtn .emoji{font-size:25px;}
+.quickbtn b{font-size:12.5px;}
+.quickbtn span{font-size:10px; color:var(--ink-soft);}
+
+/* 타임라인 */
+.tl{position:relative; padding-left:20px;}
+.tl::before{content:""; position:absolute; left:5px; top:6px; bottom:6px; width:1.5px; background:var(--line);}
+.tl-item{position:relative; padding-bottom:20px;}
+.tl-item::before{content:""; position:absolute; left:-20px; top:4px; width:10px; height:10px; border-radius:50%; background:var(--brass); border:2px solid var(--paper); box-shadow:0 0 0 1.5px var(--brass);}
+.tl-time{font-size:12px; color:var(--brass-deep); font-weight:700; font-variant-numeric:tabular-nums;}
+.tl-title{font-size:14px; font-weight:600; margin:2px 0 4px;}
+
+/* 퀴즈 */
+.qcard{border:1px solid var(--line); border-radius:var(--radius); background:var(--paper); box-shadow:var(--shadow); margin-bottom:12px; overflow:hidden;}
+.qhead{padding:14px 16px; display:flex; gap:12px; align-items:center; cursor:pointer;}
+.qhead .emo{font-size:26px;}
+.qbody{padding:0 16px 16px; display:none;}
+.qbody.open{display:block;}
+.qopt{display:block; width:100%; text-align:left; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; margin-bottom:8px; background:var(--paper); font-size:13.5px; cursor:pointer;}
+.qopt.correct{border-color:var(--good); background:#eaf5ee;}
+.qopt.wrong{border-color:var(--stamp); background:#fbecea;}
+.qopt[disabled]{cursor:default;}
+.progress{height:8px; border-radius:999px; background:var(--line); overflow:hidden;}
+.progress > i{display:block; height:100%; background:linear-gradient(90deg,var(--brass),var(--brass-deep));}
+
+/* 이야기(상식) */
+.jpcat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:7px; padding:14px 16px 4px;}
+.jpcat-grid .pill{ width:100%; white-space:normal; text-align:center; justify-content:center; padding:9px 4px; font-size:11.5px; }
+.jpcard{border:1.5px solid var(--line); border-radius:var(--radius); background:var(--paper); box-shadow:var(--shadow); margin-bottom:10px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.jpcard.on{border-color:var(--good); background:#eafaf5;}
+.jpcard-main{flex:1; cursor:pointer;}
+.jpjp{font-family:'Gaegu','Pretendard',sans-serif; font-weight:700; font-size:16px; color:var(--navy-800); display:flex; align-items:center; gap:6px;}
+.jpspk{font-size:14px; opacity:.7;}
+.jpromaji{font-size:12px; color:var(--brass-deep); font-weight:700; margin-top:2px;}
+.jpkr{font-size:12.5px; color:var(--ink-soft); margin-top:3px; line-height:1.5;}
+.jplearn{flex-shrink:0; border:1.5px solid var(--line); border-radius:999px; background:var(--paper); color:var(--ink-soft); font-size:11.5px; font-weight:700; padding:8px 11px; cursor:pointer; white-space:nowrap;}
+.jplearn.on{border-color:var(--good); background:var(--good); color:#fff;}
+
+/* 스탬프/사진/랭킹 */
+.pgrid2{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+.stampcard{border:1.5px solid var(--line); border-radius:14px; padding:14px 8px; text-align:center; background:var(--paper);}
+.stampcard.on{border-color:var(--good); background:#eaf5ee;}
+.stampicon{font-size:27px;}
+.stampname{font-size:12px; font-weight:700; margin-top:5px;}
+.stamppts{font-size:11px; color:var(--brass-deep); margin-top:2px; font-weight:700;}
+.stampcard.on .stamppts{color:var(--good);}
+.pgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.pgrid img{width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; border:1px solid var(--line);}
+.pitem{position:relative;}
+.pcap{font-size:11px; color:var(--ink-soft); margin-top:4px;}
+.pdelete{position:absolute; top:6px; right:6px; width:26px; height:26px; border-radius:50%; border:none; background:rgba(10,20,40,.6); color:#fff; font-size:13px; font-weight:700; line-height:1; cursor:pointer; z-index:2; display:flex; align-items:center; justify-content:center;}
+.upload-box{border:1.5px dashed var(--brass); border-radius:var(--radius-sm); padding:22px 10px; text-align:center; color:var(--brass-deep); font-size:13px; font-weight:600; cursor:pointer; background:#fff8ea;}
+.gcard{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); margin-bottom:14px;}
+.gcard-body{padding:16px;}
+.ranklist{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;}
+.rankrow{display:flex; align-items:center; gap:12px; padding:13px 16px; border-bottom:1px solid var(--line);}
+.rankrow:last-child{border-bottom:none;}
+.rankno{width:26px; height:26px; border-radius:50%; background:var(--parchment); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--ink-soft); flex-shrink:0;}
+.rankno.gold{background:#e9c46a;color:#5c4108;} .rankno.silver{background:#d7d7d7;color:#4a4a4a;} .rankno.bronze{background:#d7a06a;color:#4a2f0d;}
+.rankname{flex:1; font-weight:600; font-size:14px;}
+.rankscore{font-weight:700; color:var(--brass-deep); font-variant-numeric:tabular-nums;}
+.rdelete{flex-shrink:0; width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#fff; color:#b3261e; font-size:12px; font-weight:700; line-height:1; cursor:pointer; margin-left:2px;}
+
+/* 연락처/체크리스트 등 */
+.contact-row{display:flex; align-items:center; gap:12px; padding:13px 0;}
+.contact-row + .contact-row{border-top:1px solid var(--line);}
+.avatar{width:42px; height:42px; border-radius:50%; background:var(--parchment); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;}
+.callbtn{width:38px; height:38px; border-radius:50%; background:#eaf5ee; color:var(--good); display:flex; align-items:center; justify-content:center; text-decoration:none; font-size:16px; flex-shrink:0;}
+.chk-row{display:flex; align-items:center; gap:11px; padding:11px 0; font-size:14px;}
+.chk-row + .chk-row{border-top:1px solid var(--line);}
+.chk-box{width:21px; height:21px; border-radius:6px; border:1.5px solid var(--brass); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer;}
+.chk-box.on{background:var(--brass); color:#3a2405;}
+.chk-row.done span.lbl{text-decoration:line-through; color:var(--ink-faint);}
+#toast{position:fixed; left:50%; bottom:96px; transform:translateX(-50%); background:var(--navy-900); color:#eef3fb; padding:10px 18px; border-radius:999px; font-size:13px; z-index:100; opacity:0; pointer-events:none; transition:opacity .25s, bottom .25s; max-width:88%; text-align:center;}
+#toast.show{opacity:1; bottom:110px;}
+.modal-back{position:fixed; inset:0; background:rgba(10,20,40,.55); z-index:200; display:flex; align-items:flex-end; justify-content:center;}
+.modal-back .sheet{width:100%; max-width:var(--maxw); background:var(--paper); border-radius:20px 20px 0 0; padding:22px 18px calc(22px + var(--safe-b)); max-height:85vh; overflow-y:auto; position:relative;}
+.modal-back.center{align-items:center;}
+.modal-back.center .sheet{border-radius:20px; max-width:340px; margin:0 16px;}
+.closeX{position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; color:var(--ink-faint); cursor:pointer;}
+.empty{text-align:center; padding:36px 16px; color:var(--ink-faint); font-size:13.5px;}
+.section-title{font-size:13px; font-weight:700; color:var(--brass-deep); margin:4px 0 10px; display:flex; align-items:center; gap:6px;}
+.banner{background:#fff2da; border:1px solid #ffd98a; color:#8a5711; border-radius:14px; padding:11px 13px; font-size:12.5px; margin-bottom:14px; line-height:1.5;}
+.banner.info{background:#e6f4fb; border-color:#bfe2f4; color:#0e4d6e;}
+::-webkit-scrollbar{width:0; height:0;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="hero" id="hero"></header>
+  <div class="ticket-notch"></div>
+  <main id="main"></main>
+  <nav class="bottomnav" id="bottomnav"></nav>
+</div>
+<div id="toast"></div>
+<div id="modalRoot"></div>
+
+<script>
+/* =========================================================================
+   설정 데이터 — 우리 가족 강릉 겨울여행
+   ========================================================================= */
+const TRIP = {
+  title: '우리 가족 강릉 겨울여행', subtitle: '아빠·엄마·5학년·4학년·2학년',
+  theme: '겨울바다 · 눈꽃 · 가족 추억여행', startDate: '2026-12-28', endDate: '2026-12-31',
+  emoji:'❄️', checkinTime:'오후 3:00', checkoutTime:'오전 11:00',
+};
+const STAY_DEFAULT = {
+  name:'강릉시의 방', host:'비비르 알 디아', address:'강원 강릉시 사천진리 진리항구2길 5 (사천진해변 바로 앞)',
+  lat:37.8286, lng:128.8654, hostPhone:'', hostKakao:'', familyOpenchat:''
+};
+const FAMILY_DEFAULT = ['아빠','엄마','신수윤','신서윤','신다윤'];
+
+/* '가볼 곳' 스탬프 랠리 — 우리가 실제로 가면 좋은 강릉 명소. lat/lng는 GPS 도장(스탬프)용 근사 좌표예요. */
+const GUIDE = [
+  {name:'사천진해변 (숙소 바로 앞!)', area:'사천진', lat:37.8286, lng:128.8654, icon:'🏄', points:15, desc:'우리가 묵는 숙소 바로 앞 해변이에요. 서핑으로 유명한 곳이라 파도가 예쁘게 부서지는 걸 볼 수 있어요.', tip:'숙소에서 걸어서 바로 갈 수 있어요. 아침·저녁 산책 코스로 딱이에요.'},
+  {name:'경포해변', area:'경포', lat:37.8069, lng:128.9066, icon:'🏖️', points:15, desc:'강릉을 대표하는 넓은 백사장 해변이에요. 겨울엔 한적해서 가족끼리 여유롭게 걸을 수 있어요.', tip:'바람이 세니 방한복을 단단히 챙기고, 파도 가까이 가지 않도록 손을 꼭 잡아요.'},
+  {name:'안목해변 · 강릉커피거리', area:'안목', lat:37.7728, lng:128.9470, icon:'☕', points:15, desc:'바다를 보며 커피를 마실 수 있는 카페거리로 유명해요. 창가 자리에 앉아 파도 소리를 들어보세요.', tip:'아이들은 코코아·라떼, 어른들은 원두커피로 몸을 녹여요.'},
+  {name:'정동진', area:'정동진', lat:37.6906, lng:129.0347, icon:'🌅', points:20, desc:'바다와 가장 가까운 기차역으로 유명하고, 해돋이 명소이기도 해요. 모래시계공원도 함께 볼 수 있어요.', tip:'아침 일찍 가면 해돋이를 볼 수 있어요. 전날 일기예보를 꼭 확인하세요.'},
+  {name:'오죽헌', area:'죽헌', lat:37.7838, lng:128.8763, icon:'🎋', points:15, desc:'신사임당과 율곡 이이가 태어난 곳으로, 검은 대나무(오죽)숲과 옛 고택이 아름다워요.', tip:'눈이 내린 날 대나무숲이 특히 멋져요. 조용히 걸으며 옛 이야기를 나눠보세요.'},
+  {name:'하슬라아트월드', area:'정동진 인근', lat:37.7238, lng:129.0398, icon:'🎨', points:20, desc:'바다를 배경으로 한 조각공원과 미술관이에요. 독특하고 재미있는 포토존이 많아요.', tip:'야외 조각공원은 계단과 경사로가 많으니 아이들 손을 꼭 잡고 다녀요.'},
+  {name:'안반데기', area:'왕산', lat:37.6222, lng:128.7639, icon:'⛰️', points:25, desc:'해발 1,100m 높은 고원의 배추밭이 겨울엔 온통 하얀 눈밭으로 변해 장관을 이뤄요.', tip:'평지보다 기온이 훨씬 낮고 도로가 얼어있을 수 있어요. 방한 대비를 단단히 하고 운전에 유의하세요.'},
+  {name:'주문진항', area:'주문진', lat:37.8967, lng:128.8236, icon:'🦑', points:15, desc:'활기찬 어항으로, 싱싱한 해산물과 오징어난전 구경하는 재미가 있어요.', tip:'바닥이 미끄러운 곳이 많으니 천천히, 조심히 걸어요.'},
+  {name:'경포호수', area:'경포', lat:37.7963, lng:128.8963, icon:'🦢', points:15, desc:'겨울엔 고니(백조) 같은 철새들이 찾아오는 호수예요. 호숫가를 따라 산책하기 좋아요.', tip:'철새를 놀라게 하지 않도록 조용히, 멀리서 관찰해요.'},
+  {name:'강릉올림픽파크 (스피드스케이팅경기장)', area:'교동', lat:37.6987, lng:128.7602, icon:'⛸️', points:20, desc:'2018 평창 동계올림픽 스피드스케이팅 경기가 열렸던 곳으로, 지금도 스케이트를 탈 수 있어요.', tip:'운영 시간·이용료는 방문 전 강릉올림픽파크 홈페이지에서 꼭 확인하세요.'},
+];
+
+/* 맛집(식당) — 아이와 함께 가기 좋은 곳 위주 */
+const RESTAURANTS = [
+  {icon:'🥣', title:'초당순두부마을', food:'순두부', desc:'바닷물(간수)로 만든 부드러운 순두부 전문점들이 모여있는 동네예요. 맑은 순두부부터 짬뽕순두부까지 다양해요.', tip:'상 위에 반찬이 자연스레 깔리는 편안한 좌식 식당이 많아 아이와 가기 좋아요.'},
+  {icon:'🌶️', title:'초당명가짬뽕순두부', food:'짬뽕순두부', desc:'얼큰한 국물에 부드러운 순두부가 들어간 강릉식 별미로 알려진 집이에요.', tip:'아이는 맵기 전에 국물을 조금 덜어 순하게 먹여보세요.'},
+  {icon:'🌶️', title:'순두부짬뽕 초당애', food:'짬뽕순두부', desc:'웨이팅이 적은 편으로 알려진 짬뽕순두부 맛집이에요.', tip:'가족 단위 손님이 많아 아이 동반에 부담이 적어요.'},
+  {icon:'🌶️', title:'강릉짬뽕순두부 강릉본점', food:'짬뽕순두부', desc:'현지인들 사이에서도 자주 언급되는 짬뽕순두부 노포예요.', tip:'본점이라 좌석이 넉넉한 편이에요.'},
+  {icon:'🍲', title:'차현희순두부청국장', food:'순두부 · 청국장', desc:'구수한 청국장과 순두부를 함께 즐길 수 있는 곳이에요.', tip:'구수한 맛이라 어른 입맛에도, 순한 맛을 좋아하는 아이에게도 무난해요.'},
+  {icon:'🥔', title:'강릉감자옹심 강릉본점', food:'감자옹심이', desc:'오랜 시간 자리를 지켜온 감자옹심이 노포예요.', tip:'쫄깃한 옹심이를 큼직하게 썰어 나눠주면 아이도 잘 먹어요.'},
+  {icon:'🥔', title:'개미감자옹심이', food:'감자옹심이 · 감자전', desc:'현지 블로그에서도 자주 소개되는 감자옹심이 맛집이에요.', tip:'감자전도 함께 시켜서 아이 간식으로 나눠주기 좋아요.'},
+  {icon:'🥔', title:'감자적본부', food:'옹심이 · 감자전', desc:'옹심이와 감자전을 함께 즐길 수 있는 곳이에요.', tip:'따뜻한 국물 요리라 겨울 여행에 딱이에요.'},
+  {icon:'🍖', title:'강문떡갈비', food:'떡갈비', desc:'아이들이 좋아하는 달콤짭짤한 떡갈비 전문점이에요.', tip:'고기 요리라 편식하는 아이도 잘 먹는 편이에요.'},
+  {icon:'🐙', title:'주문진항 활어회센터', food:'회 · 물회', desc:'싱싱한 해산물을 직접 보고 고를 수 있는 활어회 단지예요.', tip:'2층 식당에서 바로 먹을 수 있어 신선하고, 튀김·매운탕도 함께 즐길 수 있어요.'},
+  {icon:'🍜', title:'강릉 물회 전문점 (주문진·경포 일대)', food:'물회', desc:'새콤달콤한 강원도식 물회를 맛볼 수 있는 곳들이 해변가에 모여있어요.', tip:'아이용으로는 회 대신 소면만 따로 주문 가능한 곳도 많아요.'},
+  {icon:'🍢', title:'강릉중앙시장', food:'닭강정 · 만두 · 튀김', desc:'시장 구경하며 다양한 먹거리를 즐길 수 있는 곳이에요.', tip:'아이들과 함께 시장 먹거리 투어를 해보세요. 앉을 공간은 적으니 포장 추천.'},
+  {icon:'🍚', title:'초당동 한정식 · 향토음식점', food:'한정식', desc:'강원도 향토 반찬으로 구성된 한 상을 받을 수 있는 곳들이 있어요.', tip:'좌식 방이 있는 곳을 미리 확인하면 아이와 편하게 식사할 수 있어요.'},
+  {icon:'🍜', title:'초당순두부 짬뽕 전문 골목', food:'짬뽕순두부', desc:'초당동 일대에 짬뽕순두부 전문점이 여러 곳 모여있어요. 취향에 맞는 집을 골라보세요.', tip:'대기시간이 있을 수 있으니 식사 시간을 살짝 피해서 가면 좋아요.'},
+  {icon:'🍗', title:'강릉 치킨 · 분식 프랜차이즈', food:'분식 · 치킨', desc:'아이가 다른 메뉴에 지쳤을 때 무난하게 찾을 수 있는 익숙한 맛의 매장들이 시내 곳곳에 있어요.', tip:'숙소에 포장해가서 편하게 먹어도 좋아요.'},
+  {icon:'🥩', title:'횡성한우 전문점 (강릉 시내)', food:'한우', desc:'강원도 대표 특산물인 횡성한우를 맛볼 수 있는 식당들이 있어요.', tip:'특별한 저녁 한 끼로 추천해요. 예약하고 가면 대기 없이 편해요.'},
+  {icon:'🍚', title:'강릉 곤드레밥 전문점', food:'곤드레밥', desc:'향긋한 곤드레나물을 넣은 강원도식 나물밥이에요.', tip:'슴슴한 맛이라 아이도 부담 없이 먹을 수 있어요.'},
+  {icon:'🍤', title:'주문진 오징어순대 · 튀김', food:'오징어순대', desc:'주문진 특산물인 오징어를 활용한 향토 먹거리예요.', tip:'간식처럼 조금씩 나눠 먹기 좋아요.'},
+  {icon:'🍦', title:'초당순두부 젤라또 · 두부 디저트', food:'디저트', desc:'순두부로 만든 젤라또 등 독특한 디저트를 파는 곳이 초당동에 있어요.', tip:'식사 후 아이들 간식으로 딱이에요.'},
+  {icon:'🍜', title:'강릉 짬뽕 · 중식당', food:'중식', desc:'다른 메뉴가 부담스러운 날, 무난하게 찾기 좋은 중식당들이 시내에 있어요.', tip:'아이 메뉴(짜장면 등)가 확실해서 편해요.'},
+];
+
+/* 카페 — 강릉은 카페 도시! 뷰가 좋은 곳 위주 */
+const CAFES = [
+  {icon:'☕', title:'테라로사 커피공장 (안목점)', desc:'커피 애호가들에게 유명한 대형 로스터리 카페. 바다 뷰와 함께 핸드드립·바스크 치즈케이크가 인기예요.'},
+  {icon:'☕', title:'보사노바 커피로스터스 (경포점)', desc:'경포호수가 파노라마로 펼쳐지는 뷰가 매력적이에요. 콜드브루 라떼·티라미수가 인기.'},
+  {icon:'🌊', title:'곳 (사천해변)', desc:'숙소와 가까운 사천해변의 3층 루프탑 오션뷰 카페예요. 크루아상이 유명해요.'},
+  {icon:'🌊', title:'소돌엔 (주문진 소돌해변)', desc:'파노라마 바다 전망이 펼쳐지는 카페. 파도라떼 같은 시그니처 메뉴가 있어요.'},
+  {icon:'🥐', title:'허스크밀 (강문해변)', desc:'대형 베이커리 카페로, 다양한 빵 종류가 많아 아이들 간식 고르기 좋아요.'},
+  {icon:'☕', title:'카페 무이 (커피거리)', desc:'감성적인 인테리어의 카페로 무이 라떼가 대표 메뉴예요.'},
+  {icon:'🍵', title:'카페 툇마루 (초당동)', desc:'한옥 정원이 있는 카페로, 전통차와 핸드드립을 함께 즐길 수 있어요. 아이들이 마당에서 뛰어놀기 좋아요.'},
+  {icon:'☕', title:'엘빈커피 (경포대 인근)', desc:'바다와 호수를 함께 조망할 수 있는 카페. 크로플이 인기 메뉴예요.'},
+  {icon:'🫘', title:'박이추 커피 (주문진)', desc:'강릉 커피 1세대로 꼽히는 명인의 카페로, 클래식한 핸드드립 커피를 맛볼 수 있어요.'},
+  {icon:'🍫', title:'안목해변 카페거리', desc:'바다를 바라보는 카페들이 줄지어 있는 강릉의 대표 카페 거리예요. 아이들은 코코아·라떼로 몸을 녹여요.'},
+];
+
+/* 강릉 근교 — 시간이 되면 가볼만한 곳들 */
+const NEARBY_SPOTS = [
+  {icon:'🌅', title:'동해 추암촛대바위', area:'동해시 (강릉에서 근교)', desc:'바다 위에 우뚝 솟은 촛대 모양 바위가 명물인 해안 절경이에요. 일출 명소로도 유명해요.'},
+  {icon:'🎣', title:'동해 묵호항 · 논골담길', area:'동해시', desc:'항구 마을 풍경과 알록달록한 벽화 골목을 함께 즐길 수 있어요.'},
+  {icon:'🕳️', title:'삼척 환선굴', area:'삼척시', desc:'국내 최대급 석회동굴로, 신비로운 종유석을 구경할 수 있어요. 아이들이 좋아하는 동굴 탐험 코스예요.'},
+  {icon:'🌉', title:'삼척 장호항 · 이사부사자공원', area:'삼척시', desc:'투명 카약과 짚트랙으로 유명한 에메랄드빛 해변이에요(겨울엔 운영 여부 확인 필요).'},
+  {icon:'⛩️', title:'양양 낙산사', area:'양양군', desc:'동해를 내려다보는 절벽 위 사찰로, 해수관음상과 바다 전망이 인상적이에요.'},
+  {icon:'🏄', title:'양양 서피비치 · 하조대', area:'양양군', desc:'서핑으로 유명한 해변과 소나무 숲·정자가 어우러진 하조대를 함께 볼 수 있어요.'},
+  {icon:'🏔️', title:'속초 설악산 · 대포항', area:'속초시', desc:'설악산 케이블카(운영 상황 확인 필요)와 대포항 활어회, 아바이마을 명물순대가 유명해요.'},
+  {icon:'🚋', title:'정선 레일바이크', area:'정선군', desc:'폐철로를 개조한 레일바이크로 온 가족이 페달을 밟으며 강원도 풍경을 즐길 수 있어요.'},
+  {icon:'🐑', title:'평창 대관령 삼양목장', area:'평창군 (강릉 근교)', desc:'끝없이 펼쳐진 고원 목장으로, 겨울엔 눈 덮인 설경이 장관이에요.'},
+];
+
+/* 오시는 길 휴게소 — 진주 → 강릉, 중부내륙고속도로 → 영동고속도로 경유 기준
+   (내비게이션 경로·교통 상황에 따라 달라질 수 있어요) */
+const REST_STOPS = [
+  {icon:'🛣️', name:'여주휴게소', road:'영동고속도로', desc:'무난하게 온 가족이 먹기 좋은 구성이 강점인 휴게소예요.', snack:'황태해장국, 돈가스'},
+  {icon:'🛣️', name:'문막휴게소', road:'영동고속도로', desc:'한우국밥과 장터국밥이 유명해서 특히 겨울철에 인기가 많아요.', snack:'한우국밥, 장터국밥, 갈비탕'},
+  {icon:'🐄', name:'횡성휴게소', road:'영동고속도로', desc:'횡성 한우로 유명한 지역답게 한우를 활용한 메뉴가 특징이에요. 사골 육수 핫도그도 별미로 꼽혀요.', snack:'한우 떡더덕스테이크, 한우국밥, 사골육수 핫도그'},
+  {icon:'🛣️', name:'평창휴게소', road:'영동고속도로', desc:'지역 특산물을 활용한 메뉴가 특징으로, 대관령을 앞두고 쉬어가기 좋아요.', snack:'한우불고기비빔밥, 황태해장국'},
+  {icon:'🏔️', name:'강릉(대관령)휴게소', road:'영동고속도로', desc:'대관령 정상 부근에 위치해 경치가 좋고, 강릉 도착 직전 마지막으로 들르기 좋은 휴게소예요.', snack:'초당두부 황태해장국, 곤드레비빔밥'},
+];
+
+/* 눈꽃여행 (겨울 특화) */
+const SNOW_SPOTS = [
+  {icon:'⛰️', title:'안반데기', desc:'고원의 배추밭이 겨울엔 새하얀 눈밭으로 변하는, 강릉 대표 겨울 절경이에요.'},
+  {icon:'🎋', title:'오죽헌 대나무숲', desc:'눈이 소복이 쌓인 검은 대나무숲은 사진 찍기 좋은 겨울 명소예요.'},
+  {icon:'⛸️', title:'강릉올림픽파크', desc:'2018 평창 동계올림픽 빙상 경기가 열렸던 곳에서 스케이트를 타볼 수 있어요.'},
+  {icon:'🐑', title:'대관령 삼양목장 (평창, 강릉 근교)', desc:'강릉에서 차로 이동할 수 있는 고원 목장으로, 눈 덮인 풍경이 유명해요. 행정구역은 평창군이에요.'},
+];
+
+/* 바다 · 물놀이 (겨울철 안전 위주) */
+const BEACH_SPOTS = [
+  {icon:'🏄', title:'사천진해변', desc:'숙소 바로 앞! 서핑으로 유명한 해변이에요.'},
+  {icon:'🏖️', title:'경포해변', desc:'강릉 대표 해변, 넓은 백사장에서 산책하기 좋아요.'},
+  {icon:'☕', title:'안목해변', desc:'카페거리와 함께 있어 따뜻한 음료를 마시며 바다를 즐길 수 있어요.'},
+  {icon:'🌅', title:'정동진해변', desc:'해돋이 명소이자 기차역이 바로 붙어있는 독특한 해변이에요.'},
+];
+
+/* 준비물 */
+const PACKING = [
+  {group:'방한용품', items:['두꺼운 패딩(아이들도 필수)','장갑 · 목도리 · 방한모자','핫팩','미끄럼 방지 신발(눈길·빙판 대비)']},
+  {group:'놀이용품', items:['눈썰매(현지 대여 가능한 곳도 있어요)','장갑(눈 만지기용, 방수)','작은 삽 또는 바가지(눈사람 만들기용)']},
+  {group:'차량용품', items:['워셔액 · 김서림 방지 용품','스노우체인 또는 겨울용 타이어 점검','휴대폰 충전케이블']},
+  {group:'개인용품', items:['보온병(따뜻한 물 · 차)','상비약(감기약, 멀미약 등)','휴대용 물티슈 · 손소독제']},
+  {group:'추억용품', items:['카메라 또는 스마트폰','보조배터리','작은 일기장(여행 일기 쓰기용)']},
+];
+
+/* 안전 수칙 */
+const SAFETY_RULES = [
+  '빙판길·눈길에서는 천천히 걷고, 주머니에 손을 넣지 않아요.',
+  '바닷가에서는 파도와 방파제에 가까이 가지 않아요. 겨울 파도는 갑자기 세질 수 있어요.',
+  '숙소에서 난방기구(전기장판 등) 사용 시 화재에 주의하고, 자기 전 꼭 확인해요.',
+  '차량 이동 중에는 항상 안전벨트를 착용해요.',
+  '사람이 많은 곳(시장, 관광지)에서는 미리 만날 장소를 정해두고, 흩어지지 않아요.',
+  '옷이 젖으면 감기에 걸리기 쉬우니 바로 마른 옷으로 갈아입어요.',
+  '안반데기·대관령처럼 높은 곳은 기온이 매우 낮으니 노출된 피부를 최소화해요.',
+];
+
+/* 퀴즈 */
+const QUIZZES = [
+  {id:'q1', place:'오죽헌 · 신사임당', points:30, icon:'🎋', questions:[
+    {type:'객관식', q:'오죽헌은 누가 태어난 곳으로 유명할까요?', opts:['신사임당과 율곡 이이','세종대왕','이순신 장군','유관순'], answer:0, note:'조선시대의 화가이자 어머니 신사임당, 그리고 아들 율곡 이이가 태어난 곳이에요.'},
+    {type:'OX', q:'오죽헌 마당에는 검은 대나무(오죽)가 자란다.', opts:['O','X'], answer:0, note:'오죽헌이라는 이름도 이 검은 대나무에서 왔어요.'},
+    {type:'빈칸퀴즈', q:'신사임당은 조선시대의 유명한 ___이자 어머니였다.', opts:['화가','장군','왕비','상인'], answer:0, note:'신사임당은 그림을 잘 그린 화가로도 유명해요.'},
+  ]},
+  {id:'q2', place:'경포호수 이야기', points:30, icon:'🦢', questions:[
+    {type:'OX', q:'경포호수에는 다섯 개의 달이 뜬다는 재미있는 옛이야기가 있다.', opts:['O','X'], answer:0, note:'하늘, 바다, 호수, 술잔, 그리고 사랑하는 사람의 눈동자에 뜬 달까지 — 총 다섯 개의 달을 볼 수 있다는 이야기예요.'},
+    {type:'객관식', q:'경포호수는 원래 무엇과 연결되어 있다가 막혀서 생긴 호수일까요?', opts:['바다','강','온천','계곡'], answer:0, note:'바닷물이 드나들던 자리가 막혀 생긴 호수를 "석호"라고 해요.'},
+    {type:'OX', q:'겨울에 경포호수를 찾는 철새 중에는 고니(백조)도 있다.', opts:['O','X'], answer:0, note:'겨울철엔 다양한 철새들이 경포호수를 찾아와요.'},
+  ]},
+  {id:'q3', place:'정동진 · 겨울바다', points:30, icon:'🌅', questions:[
+    {type:'객관식', q:'정동진이라는 이름은 무엇을 뜻할까요?', opts:['한양(서울)에서 정동쪽에 있는 나루','정 씨 성을 가진 사람이 만든 마을','동해에서 가장 큰 나루','정씨왕조의 수도'], answer:0, note:'조선의 수도 한양에서 정동쪽(똑바로 동쪽)에 있다고 해서 붙여진 이름이에요.'},
+    {type:'OX', q:'정동진은 바다와 가장 가까운 기차역 중 하나로 유명하다.', opts:['O','X'], answer:0, note:'기차역 바로 앞이 바로 바다예요!'},
+    {type:'빈칸퀴즈', q:'정동진은 특히 ___를 보기 위해 많은 사람들이 찾는 곳이다.', opts:['해돋이','단풍','벚꽃','눈썰매'], answer:0, note:'새해 첫날엔 특히 많은 사람이 해돋이를 보러 정동진을 찾아요.'},
+  ]},
+  {id:'q4', place:'강릉 먹거리', points:30, icon:'🥣', questions:[
+    {type:'객관식', q:'강릉 초당마을이 유명한 음식은?', opts:['순두부','냉면','비빔밥','칼국수'], answer:0, note:'초당동은 바닷물로 간을 한 부드러운 순두부로 유명해요.'},
+    {type:'OX', q:'강릉은 카페거리로도 유명해서 "커피 도시"라고도 불린다.', opts:['O','X'], answer:0, note:'안목해변의 카페거리가 특히 유명해요.'},
+    {type:'빈칸퀴즈', q:'쫄깃한 식감의 감자로 만든 강원도 대표 음식은 감자 ___이다.', opts:['옹심이','전','떡','국'], answer:0, note:'쫄깃쫄깃한 감자옹심이는 강원도 향토음식이에요.'},
+  ]},
+];
+
+/* 포토챌린지 */
+const PHOTO_CHALLENGES = [
+  {id:'p1', title:'사천진해변 가족 점프샷', place:'사천진해변(숙소 앞)', points:15, icon:'🤸', desc:'숙소 앞 바다를 배경으로 온 가족이 동시에 점프! 타이밍 맞춰 찍어보세요.'},
+  {id:'p2', title:'경포해변 발자국 남기기', place:'경포해변', points:15, icon:'👣', desc:'모래 위에 가족 발자국을 나란히 남기고 사진을 찍어보세요.'},
+  {id:'p3', title:'안목 카페거리 바다뷰 인증샷', place:'안목해변', points:15, icon:'☕', desc:'창가 자리에서 따뜻한 음료와 바다를 함께 담아보세요.'},
+  {id:'p4', title:'오죽헌 대나무숲 사진', place:'오죽헌', points:15, icon:'🎋', desc:'검은 대나무숲을 배경으로 가족사진을 찍어보세요.'},
+  {id:'p5', title:'정동진 기차역 인증샷', place:'정동진', points:20, icon:'🚉', desc:'바다와 가장 가까운 기차역, 정동진역을 배경으로 찍어보세요.'},
+  {id:'p6', title:'안반데기 눈꽃 가족사진', place:'안반데기', points:25, icon:'❄️', desc:'하얀 눈밭을 배경으로 온 가족이 함께 찍어보세요.'},
+  {id:'p7', title:'강릉 맛집 먹방 인증샷', place:'강릉 시내', points:15, icon:'😋', desc:'순두부나 감자옹심이를 맛있게 먹는 모습을 찍어보세요!'},
+  {id:'p8', title:'눈사람 만들기 인증샷', place:'어디든', points:20, icon:'⛄', desc:'가족과 함께 눈사람을 만들고 완성작을 찍어보세요.'},
+  {id:'p9', title:'숙소에서 다같이 저녁 인증샷', place:'숙소', points:15, icon:'🍽️', desc:'숙소에서 온 가족이 둘러앉아 저녁 먹는 모습을 찍어보세요.'},
+  {id:'p10', title:'강릉올림픽파크 스케이트 인증샷', place:'강릉올림픽파크', points:20, icon:'⛸️', desc:'스케이트를 타거나 타려고 준비하는 모습을 찍어보세요.'},
+];
+
+/* 랜덤 미션 */
+const RANDOM_MISSIONS = [
+  {title:'가족과 하이파이브하고 사진 찍기', points:10},
+  {title:'오늘 본 것 중 제일 좋았던 것 하나씩 이야기하기', points:15},
+  {title:'바닷가에서 예쁜 조개껍데기 하나 주워오기', points:10},
+  {title:'오늘 하루 감사한 일 한 가지 말하기', points:15},
+  {title:'형제·자매랑 가위바위보 3판 하기', points:10},
+  {title:'창밖 겨울 풍경 중 인상 깊은 것 그림으로 그려보기', points:20},
+  {title:'오늘 먹은 음식 이름 기억해서 설명하기', points:10},
+  {title:'가족사진 찍을 때 제일 재밌는 포즈 만들기', points:15},
+  {title:'숙소 근처를 산책하며 예쁜 것 하나 발견하기', points:10},
+  {title:'여행 일기 세 줄 쓰기', points:20},
+];
+
+/* 이야기(상식) — 강릉에 대해 알아두면 재밌는 이야기들 */
+const GANGNEUNG_FACTS = [
+  {cat:'전설 · 유래', icon:'📜', items:[
+    {title:'경포호의 다섯 개 달', detail:'하늘에 뜬 달, 바다에 뜬 달, 호수에 뜬 달, 술잔 속에 뜬 달, 그리고 사랑하는 사람의 눈동자에 뜬 달까지 — 경포호에 가면 다섯 개의 달을 볼 수 있다는 옛이야기가 전해져요.'},
+    {title:'정동진 이름의 유래', detail:'조선의 수도 한양(지금의 서울)에서 정동쪽(똑바로 동쪽) 방향에 있다고 해서 "정동진"이라는 이름이 붙었어요.'},
+    {title:'오죽헌 이름의 유래', detail:'마당에 자라는 검은 대나무(오죽)에서 이름을 따왔어요. 신사임당과 율곡 이이가 태어난 유서 깊은 곳이에요.'},
+  ]},
+  {cat:'겨울과 눈', icon:'❄️', items:[
+    {title:'안반데기가 겨울에 특별한 이유', detail:'해발 1,100m가 넘는 고원지대라 겨울엔 다른 지역보다 눈이 많이 쌓이고, 새하얀 설경이 장관을 이뤄요.'},
+    {title:'강릉과 2018 평창 동계올림픽', detail:'2018년 평창 동계올림픽 때, 스케이트·컬링 같은 빙상 종목 경기들이 실제로 강릉에서 열렸어요. 그래서 강릉엔 지금도 올림픽 경기장이 남아있어요.'},
+    {title:'왜 대관령 쪽이 더 추울까?', detail:'대관령·안반데기 같은 고원지대는 해발고도가 높아서 평지인 강릉 시내보다 기온이 훨씬 낮아요. 이동할 땐 옷을 든든히 챙겨야 해요.'},
+  ]},
+  {cat:'커피 이야기', icon:'☕', items:[
+    {title:'강릉이 커피 도시가 된 이유', detail:'안목해변의 자판기 커피에서 시작된 이야기가 점점 유명해지면서, 지금은 개성 있는 카페들이 모인 "커피거리"로 발전했어요.'},
+    {title:'원두 로스팅이 뭘까?', detail:'커피나무 열매의 씨앗(생두)을 볶는 과정을 "로스팅"이라고 해요. 볶는 정도에 따라 커피 맛이 크게 달라져요.'},
+  ]},
+  {cat:'맛있는 이야기', icon:'🥣', items:[
+    {title:'초당순두부는 왜 부드러울까?', detail:'응고제로 바닷물(간수)을 사용해서 더 부드럽고 고소한 순두부가 만들어져요. 그래서 "초당순두부"라는 이름으로 유명해졌어요.'},
+    {title:'감자옹심이의 옹심이란?', detail:'강원도 사투리로 새알심(경단)처럼 동글동글하게 빚은 감자 반죽을 "옹심이"라고 불러요.'},
+    {title:'짬뽕순두부는 어떻게 생겨났을까?', detail:'부드러운 순두부에 얼큰한 짬뽕 국물을 더한 강릉식 퓨전 음식으로, 최근 강릉의 별미로 인기를 끌고 있어요.'},
+  ]},
+];
+
+const DEFAULT_FIREBASE_CONFIG = { apiKey:"", authDomain:"", projectId:"", storageBucket:"", messagingSenderId:"", appId:"" };
+/* 파이어베이스 설정은 코드에 직접 넣지 않고, 관리자(⚙️ 설정) 화면에서 붙여넣어
+   이 기기의 저장소(localStorage)에 저장해요. 그래야 각자 만든 파이어베이스
+   프로젝트를 코드 수정 없이 바로 연결할 수 있어요. */
+function loadFirebaseConfig(){ try{ const v=localStorage.getItem('gnfam_firebase_config'); return v? JSON.parse(v) : DEFAULT_FIREBASE_CONFIG; }catch(e){ return DEFAULT_FIREBASE_CONFIG; } }
+const FIREBASE_CONFIG = loadFirebaseConfig();
+
+/* =========================================================================
+   유틸리티
+   ========================================================================= */
+function lsGet(key, def){ try{ const v=localStorage.getItem('gnfam_'+key); return v===null? def : JSON.parse(v); }catch(e){ return def; } }
+function lsSet(key, val){ try{ localStorage.setItem('gnfam_'+key, JSON.stringify(val)); }catch(e){ console.warn('저장 실패', e); } }
+function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escAttr(s){ return escapeHtml(s); }
+function sanitizeId(s){ return (String(s).replace(/[^\w가-힣]/g,'_').slice(0,60)) || 'anon'; }
+
+let toastTimer=null;
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'), 2200); }
+function celebrate(){
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cx=window.innerWidth/2, cy=Math.min(210, window.innerHeight*0.28);
+  const bits=['✨','🎉','⭐','❄️'];
+  for(let i=0;i<7;i++){
+    const el=document.createElement('div');
+    el.textContent=bits[Math.floor(Math.random()*bits.length)];
+    const dx=(Math.random()-0.5)*130;
+    el.style.cssText=`position:fixed; left:${cx+dx}px; top:${cy}px; font-size:${15+Math.random()*13}px; pointer-events:none; z-index:300; animation:floatUp ${0.7+Math.random()*0.5}s ease-out forwards;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 1300);
+  }
+}
+function openSheet(html){ document.getElementById('modalRoot').innerHTML=`<div class="modal-back" onclick="if(event.target===this) closeModal()"><div class="sheet">${html}</div></div>`; }
+function openCenter(html){ document.getElementById('modalRoot').innerHTML=`<div class="modal-back center" onclick="if(event.target===this) closeModal()"><div class="sheet">${html}</div></div>`; }
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+function haversine(lat1,lon1,lat2,lon2){ const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180; const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2); return 2*R*Math.asin(Math.sqrt(a)); }
+function compressImage(file, maxW, quality){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+        const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror=()=>reject(new Error('이미지를 읽을 수 없어요')); img.src=e.target.result;
+    };
+    reader.onerror=()=>reject(new Error('파일을 읽을 수 없어요')); reader.readAsDataURL(file);
+  });
+}
+function todayStr(){ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
+function daysBetween(a,b){ return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000); }
+function dowKo(dateStr){ return ['일','월','화','수','목','금','토'][new Date(dateStr+'T00:00:00').getDay()]; }
+function fmtMD(dateStr){ const d=new Date(dateStr+'T00:00:00'); return `${d.getMonth()+1}/${d.getDate()}(${dowKo(dateStr)})`; }
+function fmtRangeKo(s,e){ const sd=new Date(s+'T00:00:00'), ed=new Date(e+'T00:00:00'); return `${sd.getFullYear()}.${sd.getMonth()+1}.${sd.getDate()}(${dowKo(s)}) ~ ${ed.getMonth()+1}.${ed.getDate()}(${dowKo(e)}) · 3박4일`; }
+function ddayInfo(){
+  const today=todayStr(); const n=daysBetween(today, TRIP.startDate); const mEnd=daysBetween(today, TRIP.endDate);
+  if(n>0) return {state:'before', daysLeft:n, badge:'D-'+n, badgeSub:'출발 전'};
+  if(mEnd>=0){ const dayIndex=-n; return {state:'during', dayIndex, badge:(dayIndex+1)+'일차', badgeSub:'여행 중'}; }
+  return {state:'after', badge:'완료', badgeSub:'여행 종료'};
+}
+
+/* 추천 코스 — 체크인/체크아웃 날짜에 맞춘 자유 일정 제안 (자유롭게 바꿔도 좋아요) */
+function suggestedCourse(){
+  return [
+    { label:'1일차 · 12/28(월)', theme:'도착 · 숙소 근처 적응', items:[
+      '오후 3:00 숙소(사천진리) 체크인',
+      '사천진해변 산책 — 숙소 바로 앞이라 짐 풀고 가볍게 다녀오기 좋아요',
+      '근처에서 저녁 식사 후 일찍 휴식 (다음날을 위해 체력 비축!)',
+    ]},
+    { label:'2일차 · 12/29(화)', theme:'경포 · 안목 · 오죽헌', items:[
+      '오전: 오죽헌 — 대나무숲 산책, 신사임당 이야기 나누기',
+      '점심: 초당순두부마을에서 순두부 식사',
+      '오후: 경포해변 · 경포호수 산책, 철새 구경',
+      '저녁: 안목해변 카페거리에서 바다 보며 마무리',
+    ]},
+    { label:'3일차 · 12/30(수)', theme:'안반데기 눈꽃 · 정동진', items:[
+      '오전: 안반데기 눈꽃 구경 (기온이 낮으니 방한 단단히!)',
+      '점심: 이동 중 강원도 향토음식(감자옹심이 등)',
+      '오후: 정동진 — 모래시계공원, 기차역 구경',
+      '저녁: 강릉올림픽파크에서 스케이트 (운영시간 사전 확인)',
+    ]},
+    { label:'4일차 · 12/31(목)', theme:'주문진 · 귀가', items:[
+      '오전 11:00 숙소 체크아웃',
+      '주문진항 들러 해산물 구경·간식',
+      '테라로사 커피공장 또는 강릉중앙시장에서 마지막 간식',
+      '안전 운전하며 귀가',
+    ]},
+  ];
+}
+
+/* =========================================================================
+   Firebase — 공유 랭킹 / 갤러리 / 설정 (FIREBASE_CONFIG가 비어있으면 자동으로
+   "이 기기 전용" 모드로 동작해요. 여러 폰에서 랭킹·갤러리를 공유하고 싶으면
+   무료 Firebase 프로젝트를 만들어 위 FIREBASE_CONFIG 값을 채워주세요.)
+   ========================================================================= */
+let firebaseReady=false, db=null, isAdminSession=false;
+try{ if(FIREBASE_CONFIG.apiKey){ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.firestore(); firebaseReady=true; } }catch(e){ console.warn('[강릉가족여행 앱] Firebase 초기화 실패'); firebaseReady=false; }
+let __firestoreWarned=false;
+function warnFirestoreOnce(err){
+  if(__firestoreWarned) return; __firestoreWarned=true;
+  if(err && err.code==='permission-denied') console.warn('[강릉가족여행 앱] Firestore 권한 오류(permission-denied)');
+  else console.warn('[강릉가족여행 앱] 공유 서버 연결 실패', err);
+}
+async function fetchRanking(){ if(firebaseReady){ try{ const snap=await db.collection('rankings').get(); return snap.docs.map(d=>d.data()); }catch(e){ warnFirestoreOnce(e); return []; } } return lsGet('fallback_rankings', []); }
+async function submitRanking(name, data){ if(firebaseReady){ try{ await db.collection('rankings').doc(sanitizeId(name)).set(data, {merge:true}); return; }catch(e){ warnFirestoreOnce(e); } } const list=lsGet('fallback_rankings', []); const idx=list.findIndex(x=>x.name===name); if(idx>=0) list[idx]={...list[idx], ...data}; else list.push(data); lsSet('fallback_rankings', list); }
+async function deleteRankingEntry(name){ if(firebaseReady){ try{ await db.collection('rankings').doc(sanitizeId(name)).delete(); return true; }catch(e){ warnFirestoreOnce(e); return false; } } const list=lsGet('fallback_rankings', []).filter(x=>x.name!==name); lsSet('fallback_rankings', list); return true; }
+async function fetchGallery(){ if(firebaseReady){ try{ const snap=await db.collection('gallery').orderBy('createdAt','desc').limit(60).get(); return snap.docs.map(d=>({...d.data(), _id:d.id})); }catch(e){ warnFirestoreOnce(e); return []; } } return lsGet('fallback_gallery', []).slice().reverse(); }
+async function addGalleryPhoto(payload){ if(firebaseReady){ try{ await db.collection('gallery').add(payload); return; }catch(e){ warnFirestoreOnce(e); } } const list=lsGet('fallback_gallery', []); list.push(payload); lsSet('fallback_gallery', list); }
+async function deleteGalleryPhotoAt(list, i){ const p=list[i]; if(!p) return false; if(firebaseReady){ try{ await db.collection('gallery').doc(p._id).delete(); return true; }catch(e){ warnFirestoreOnce(e); return false; } } const raw=lsGet('fallback_gallery', []); const rawIdx=raw.length-1-i; raw.splice(rawIdx,1); lsSet('fallback_gallery', raw); return true; }
+
+/* =========================================================================
+   점수 계산
+   ========================================================================= */
+function getMyName(){ return lsGet('myname',''); }
+function quizAnswerKey(qid,qi){ return qid+'_'+qi; }
+function getQuizAnswers(){ return lsGet('quiz_answers', {}); }
+function setQuizAnswer(qid,qi,idx){ const a=getQuizAnswers(); a[quizAnswerKey(qid,qi)]=idx; lsSet('quiz_answers', a); }
+function quizSetScore(set){ const a=getQuizAnswers(); const per=Math.round(set.points/set.questions.length); let s=0; set.questions.forEach((q,qi)=>{ if(a[quizAnswerKey(set.id,qi)]===q.answer) s+=per; }); return s; }
+function sumQuizScore(){ return QUIZZES.reduce((s,set)=>s+quizSetScore(set), 0); }
+function quizSetProgress(set){ const a=getQuizAnswers(); let done=0; set.questions.forEach((q,qi)=>{ if(a[quizAnswerKey(set.id,qi)]!==undefined) done++; }); return {done, total:set.questions.length}; }
+function getStamps(){ return lsGet('stamps', {}); }
+function stampPointsEarned(){ const stamps=getStamps(); return GUIDE.reduce((s,g)=> s+(stamps[g.name]? g.points:0), 0); }
+function getPhotoChallenges(){ return lsGet('photo_challenges', {}); }
+function sumPhotoScore(){ const d=getPhotoChallenges(); let s=0; PHOTO_CHALLENGES.forEach(c=>{ if(d[c.id]) s+=c.points; }); return s+lsGet('random_score', 0); }
+function getMyPhotos(){ return lsGet('my_photos', []); }
+function photoUploadCount(){ return getMyPhotos().length + lsGet('shared_photo_count', 0); }
+function photoUploadScore(){ return photoUploadCount() * 2; }
+function getFactsLearned(){ return lsGet('facts_learned', {}); }
+function factKey(ci,ii){ return ci+'_'+ii; }
+function factsAllCount(){ return GANGNEUNG_FACTS.reduce((s,c)=>s+c.items.length,0); }
+function factsLearnedCount(){ return Object.values(getFactsLearned()).filter(Boolean).length; }
+async function syncMyScore(){
+  const name=getMyName(); if(!name) return;
+  const quiz=sumQuizScore(), challengeScore=sumPhotoScore(), stampPts=stampPointsEarned();
+  const factPts = factsLearnedCount() * 5;
+  const uploadPts = photoUploadScore();
+  let photoScore = challengeScore + uploadPts;
+  let data = {quizScore:quiz, photoScore, stampScore:stampPts, factScore:factPts, uploadScore:uploadPts};
+  /* 다른 기기(가족 각자 폰)는 이 기기의 진행 상황을 모르는 "빈 상태"로 시작해요.
+     그대로 덮어쓰면 이미 쌓여있던 점수가 깎일 수 있어서, 기존 값과 비교해 더 큰 쪽만 저장해요. */
+  if(firebaseReady){
+    try{
+      const snap = await db.collection('rankings').doc(sanitizeId(name)).get();
+      if(snap.exists){
+        const prev = snap.data() || {};
+        data.quizScore = Math.max(data.quizScore, prev.quizScore||0);
+        data.stampScore = Math.max(data.stampScore, prev.stampScore||0);
+        data.factScore = Math.max(data.factScore, prev.factScore||0);
+        data.uploadScore = Math.max(data.uploadScore, prev.uploadScore||0);
+        data.photoScore = Math.max(data.photoScore, prev.photoScore||0, data.uploadScore);
+      }
+    }catch(e){ warnFirestoreOnce(e); }
+  }
+  data.totalScore = data.quizScore + data.photoScore + data.stampScore + data.factScore;
+  await submitRanking(name, {name, ...data, updatedAt:Date.now()});
+}
+
+/* =========================================================================
+   화면 상태 & 렌더링
+   ========================================================================= */
+const ui = { tab:'home', missionSub:'quiz', infoSub:'course', photoSub:'mine', factCat:0, openQuiz:null, randomMission:null };
+const TABS = [ {id:'home',label:'홈',icon:'🏠'}, {id:'info',label:'정보',icon:'ℹ️'}, {id:'mission',label:'미션',icon:'🧩'}, {id:'photo',label:'사진',icon:'📷'}, {id:'story',label:'이야기',icon:'📖'}, {id:'rank',label:'랭킹',icon:'🏆'} ];
+const INFO_TABS = [ ['course','🗓️ 추천코스'],['guide','🗺️ 가볼곳'],['nearby','🚗 근교나들이'],['reststop','🛣️ 오는길휴게소'],['food','🍜 맛집'],['cafe','☕ 카페'],['snow','❄️ 눈꽃여행'],['beach','🌊 바다놀이'],['packing','🎒 준비물'],['safety','⚠️ 안전수칙'],['contacts','📞 연락처'] ];
+
+function setTab(id){ ui.tab=id; renderAll(); window.scrollTo(0,0); }
+function renderHero(){
+  const d=ddayInfo();
+  document.getElementById('hero').innerHTML=`<div class="hero-top"><div><h1 class="hero-title">${TRIP.emoji} ${TRIP.title}</h1><p class="hero-sub">${TRIP.subtitle}</p><p class="hero-theme">${TRIP.theme}</p></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;"><button class="admin-btn" onclick="openAdminGate()">⚙️ 설정</button><div class="stamp-badge"><b>${d.badge}</b><span>${d.badgeSub}</span></div></div></div><div class="hero-date">📅 ${fmtRangeKo(TRIP.startDate, TRIP.endDate)}</div>`;
+}
+function renderBottomNav(){ document.getElementById('bottomnav').innerHTML=TABS.map(t=>`<button class="navbtn ${ui.tab===t.id?'active':''}" onclick="setTab('${t.id}')"><span class="ic">${t.icon}</span>${t.label}</button>`).join(''); }
+function renderAll(){
+  try{
+    renderHero(); renderBottomNav(); const main=document.getElementById('main');
+    if(ui.tab==='home') main.innerHTML=viewHome(); else if(ui.tab==='mission') main.innerHTML=viewMission(); else if(ui.tab==='story') main.innerHTML=viewStory(); else if(ui.tab==='rank') main.innerHTML=viewRank(); else if(ui.tab==='photo') main.innerHTML=viewPhoto(); else main.innerHTML=viewInfo();
+    afterRender();
+  }catch(e){ console.error(e); document.getElementById('main').innerHTML=`<div class="wrap"><div class="card"><h3>⚠️ 문제가 발생했어요</h3><p>${escapeHtml(String(e.message||e))}</p></div></div>`; }
+}
+function afterRender(){ if(ui.tab==='rank') loadRankBody(); if(ui.tab==='photo' && ui.photoSub==='shared') loadGallery(); if(ui.tab==='home') updateMyRank(); }
+
+/* ---------- 홈 ---------- */
+function nextMissionHint(){
+  if(sumQuizScore()===0) return {text:'미션 탭에서 강릉 퀴즈를 풀어보세요!', emoji:'🎯'};
+  if(Object.keys(getPhotoChallenges()).length===0) return {text:'포토챌린지에 도전해서 추억을 남겨보세요!', emoji:'📸'};
+  if(Object.keys(getStamps()).length===0) return {text:'여행지에 도착하면 스탬프를 모아보세요!', emoji:'🏅'};
+  if(!getMyName()) return {text:'랭킹 탭에서 이름을 등록해보세요!', emoji:'🏆'};
+  return {text:'오늘도 즐거운 하루 보내요!', emoji:'🌟'};
+}
+function viewHome(){
+  const d=ddayInfo(); const stay=lsGet('stay', STAY_DEFAULT);
+  let scheduleBlock='';
+  if(d.state==='before'){
+    scheduleBlock=`<div class="card"><h3>📅 여행까지</h3><p><b style="color:var(--brass-deep)">${d.daysLeft}일</b> 남았어요! 설레는 마음으로 준비해볼까요? ❄️</p><hr class="dashed"><p><span class="tag blue">체크인</span> ${fmtMD(TRIP.startDate)} ${TRIP.checkinTime} · <span class="tag blue">체크아웃</span> ${fmtMD(TRIP.endDate)} ${TRIP.checkoutTime}</p></div>`;
+  } else if(d.state==='during'){
+    const course=suggestedCourse()[Math.min(d.dayIndex, suggestedCourse().length-1)];
+    scheduleBlock=`<div class="card"><h3>📅 오늘 · ${course.label} · ${course.theme}</h3><div class="tl">${course.items.map(it=>`<div class="tl-item"><div class="tl-title">${it}</div></div>`).join('')}</div><button class="btn ghost block sm" onclick="ui.tab='info'; ui.infoSub='course'; renderAll();">추천 코스 자세히 보기 →</button></div>`;
+  } else {
+    scheduleBlock=`<div class="card"><h3>📅 여행이 끝났어요</h3><p>즐거운 추억 가득했길 바라요! ❄️ 사진 탭에서 추억을 다시 볼 수 있어요.</p></div>`;
+  }
+  const q=sumQuizScore(), st=Object.keys(getStamps()).length, ph=sumPhotoScore(), fact=factsLearnedCount()*5, up=photoUploadScore(), hint=nextMissionHint();
+  return `<div class="wrap"><div class="banner info">🏠 <b>숙소 안내</b> · ${escapeHtml(stay.address)} · 체크인 ${TRIP.checkinTime} / 체크아웃 ${TRIP.checkoutTime}</div>
+    ${scheduleBlock}
+    <div class="stats"><div class="stat"><b>${q}</b><span>퀴즈 점수</span></div><div class="stat"><b>${st}/${GUIDE.length}</b><span>스탬프</span></div><div class="stat"><b>${ph}</b><span>📸 미션 점수</span></div><div class="stat"><b>${up}</b><span>📷 사진 점수</span></div><div class="stat"><b>${fact}</b><span>📖 이야기 점수</span></div><div class="stat"><b id="myRankStat">–</b><span>내 순위</span></div></div>
+    <div class="card"><h3>⚡ 빠른 실행</h3><div class="quickgrid">
+      <button class="quickbtn" onclick="ui.tab='mission'; ui.missionSub='stamp'; renderAll();"><span class="emoji">🏅</span><b>스탬프 받기</b><span>GPS 위치 인증</span></button>
+      <button class="quickbtn" onclick="ui.tab='mission'; ui.missionSub='photo'; renderAll();"><span class="emoji">📸</span><b>포토챌린지</b><span>사진 올리면 완료</span></button>
+      <button class="quickbtn" onclick="ui.tab='photo'; ui.photoSub='shared'; renderAll();"><span class="emoji">🌍</span><b>공유 갤러리</b><span>가족 사진 보기</span></button>
+      <button class="quickbtn" onclick="ui.tab='rank'; renderAll();"><span class="emoji">🏆</span><b>랭킹 보기</b><span>가족 순위</span></button>
+    </div></div>
+    <div class="card" style="background:#fff8ea; border-color:#f0dfa8;"><h3>${hint.emoji} 도전할 미션</h3><p style="color:var(--ink);">${hint.text}</p></div>
+  </div>`;
+}
+function updateMyRank(){
+  const el=document.getElementById('myRankStat'); if(!el) return;
+  const name=getMyName(); if(!name){ el.textContent='–'; return; }
+  fetchRanking().then(list=>{ const sorted=list.slice().sort((a,b)=>(b.totalScore||0)-(a.totalScore||0)); const idx=sorted.findIndex(x=>x.name===name); el.textContent=idx>=0?(idx+1)+'위':'–'; });
+}
+
+/* ---------- 정보 ---------- */
+function viewInfo(){
+  const sub=ui.infoSub||'course';
+  let body='';
+  if(sub==='course') body=infoCourse(); else if(sub==='guide') body=infoGuide(); else if(sub==='nearby') body=infoNearby(); else if(sub==='reststop') body=infoRestStops(); else if(sub==='food') body=infoFood(); else if(sub==='cafe') body=infoCafe(); else if(sub==='snow') body=infoSnow(); else if(sub==='beach') body=infoBeach(); else if(sub==='packing') body=infoPacking(); else if(sub==='safety') body=infoSafety(); else body=infoContacts();
+  return `<div class="subtabs-grid">${INFO_TABS.map(([id,label])=>`<button class="pill ${sub===id?'active':''}" onclick="ui.infoSub='${id}'; renderAll();">${label}</button>`).join('')}</div><div class="wrap" style="padding-top:6px;">${body}</div>`;
+}
+/* 장소별 사진 — 관리자가 직접 올린 사진을 카드에 붙여줘요 (사진의 출처·정확도를 보장할 수 없는
+   외부 이미지를 무작정 가져오는 대신, 가족이 직접 찍거나 고른 사진을 올리는 방식이에요). */
+function getPlacePhoto(cat,id){ return lsGet('placephoto_'+cat+'_'+sanitizeId(id), null); }
+function placePhotoBlock(cat,id){
+  const photo=getPlacePhoto(cat,id);
+  if(photo) return `<div style="position:relative; margin-top:10px;"><img src="${photo}" style="width:100%; border-radius:12px; border:1px solid var(--line);">${isAdminSession?`<button class="pdelete" onclick="removePlacePhoto('${cat}','${escAttr(id)}')">✕</button>`:''}</div>`;
+  if(isAdminSession) return `<label class="upload-box" style="display:block; margin-top:10px; padding:14px 10px; font-size:12px;" id="uplPlace-${cat}-${sanitizeId(id)}">📷 사진 추가하기 (관리자)<input type="file" accept="image/*" style="display:none" onchange="addPlacePhoto('${cat}','${escAttr(id)}', this)"></label>`;
+  return '';
+}
+async function addPlacePhoto(cat,id,input){
+  const file=input.files[0]; if(!file) return;
+  try{ const dataUrl=await compressImage(file, 900, 0.7); lsSet('placephoto_'+cat+'_'+sanitizeId(id), dataUrl); toast('사진을 추가했어요!'); renderAll(); }
+  catch(e){ toast('사진을 불러오지 못했어요.'); }
+}
+function removePlacePhoto(cat,id){ localStorage.removeItem('gnfam_placephoto_'+cat+'_'+sanitizeId(id)); renderAll(); }
+function infoCourse(){
+  let html=`<div class="banner info">🗓️ 체크인·체크아웃 날짜에 맞춰 짜본 추천 코스예요. 날씨와 아이들 컨디션에 맞게 자유롭게 바꿔도 좋아요!</div>`;
+  html+=suggestedCourse().map(day=>`<div class="card"><h3>${day.label}</h3><p style="margin-bottom:8px; color:var(--brass-deep); font-weight:700;">${day.theme}</p><div class="tl">${day.items.map(it=>`<div class="tl-item"><div class="tl-title">${it}</div></div>`).join('')}</div></div>`).join('');
+  return html;
+}
+function infoGuide(){
+  let html=`<div class="section-title">📍 가볼 곳 (스탬프 랠리)</div>`;
+  html+=GUIDE.map(g=>{ const mapUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(g.name.replace(/\s*\(.*?\)\s*/g,'')+' 강릉');
+    return `<div class="gcard"><div class="gcard-body"><div class="row-between"><h3 style="margin:0; display:flex; align-items:center; gap:7px;"><span style="font-size:19px;">${g.icon}</span>${g.name}</h3><span class="tag">${g.area}</span></div><p style="margin-top:6px;">${g.desc}</p><div class="banner" style="margin-top:10px;">💡 ${g.tip}</div>${placePhotoBlock('guide',g.name)}<a class="btn ghost block sm" style="display:block; text-align:center; text-decoration:none; margin-top:10px;" href="${mapUrl}" target="_blank" rel="noopener">🗺️ 구글 지도에서 보기</a></div></div>`; }).join('');
+  return html;
+}
+function infoNearby(){
+  let html=`<div class="section-title">🚗 강릉 근교 나들이</div><p style="font-size:12px; color:var(--ink-soft); margin:-4px 0 12px;">시간과 컨디션이 되면 강릉에서 조금 더 가볼 수 있는 근교 명소들이에요. (겨울철 운영 여부는 방문 전 확인하세요)</p>`;
+  html+=NEARBY_SPOTS.map(n=>{ const mapUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(n.title.replace(/\s*\(.*?\)\s*/g,'')+' '+n.area);
+    return `<div class="gcard"><div class="gcard-body"><div class="row-between"><h3 style="margin:0; display:flex; align-items:center; gap:7px;"><span style="font-size:19px;">${n.icon}</span>${n.title}</h3><span class="tag blue">${n.area}</span></div><p style="margin-top:6px;">${n.desc}</p>${placePhotoBlock('nearby',n.title)}<a class="btn ghost block sm" style="display:block; text-align:center; text-decoration:none; margin-top:10px;" href="${mapUrl}" target="_blank" rel="noopener">🗺️ 구글 지도에서 보기</a></div></div>`; }).join('');
+  return html;
+}
+function infoRestStops(){
+  let html=`<div class="banner info">🚙 진주에서 강릉까지 중부내륙고속도로 → 영동고속도로를 이용할 때 만날 수 있는 대표 휴게소들이에요. 내비게이션 경로에 따라 달라질 수 있어요.</div>`;
+  html+=REST_STOPS.map(r=>`<div class="card"><div class="row-between"><h3 style="margin:0;">${r.icon} ${r.name}</h3><span class="tag">${r.road}</span></div><p style="margin-top:6px;">${r.desc}</p><div class="banner" style="margin-top:10px;">🍽️ 추천 간식: <b>${r.snack}</b></div></div>`).join('');
+  return html;
+}
+function infoFood(){
+  let html=`<div class="section-title">🍜 맛집 (아이와 함께 가기 좋은 곳)</div><p style="font-size:12px; color:var(--ink-soft); margin:-4px 0 12px;">강릉에 가면 꼭 먹어봐야 할 음식들, 아이와 함께 가기 좋은 곳 위주로 모았어요.</p>`;
+  html+=RESTAURANTS.map(f=>`<div class="card"><div class="row-between"><h3 style="margin:0;">${f.icon} ${f.title}</h3><span class="tag green">${f.food}</span></div><p style="margin-top:6px;">${f.desc}</p><div class="banner" style="margin-top:10px;">💡 ${f.tip}</div>${placePhotoBlock('food',f.title)}</div>`).join('');
+  return html;
+}
+function infoCafe(){
+  let html=`<div class="section-title">☕ 카페</div><p style="font-size:12px; color:var(--ink-soft); margin:-4px 0 12px;">강릉은 카페 도시! 바다·호수 뷰가 좋은 카페들을 모았어요.</p>`;
+  html+=CAFES.map(f=>`<div class="card"><h3>${f.icon} ${f.title}</h3><p>${f.desc}</p>${placePhotoBlock('cafe',f.title)}</div>`).join('');
+  return html;
+}
+function infoSnow(){
+  let html=`<div class="section-title">❄️ 눈꽃여행</div><p style="font-size:12px; color:var(--ink-soft); margin:-4px 0 12px;">겨울에만 볼 수 있는 강릉의 특별한 풍경이에요.</p>`;
+  html+=SNOW_SPOTS.map(s=>`<div class="card"><h3>${s.icon} ${s.title}</h3><p>${s.desc}</p></div>`).join('');
+  return html;
+}
+function infoBeach(){
+  let html=`<div class="section-title">🌊 바다 · 물놀이</div><div class="banner">⚠️ 겨울 바다는 물이 매우 차갑고 파도가 갑자기 세질 수 있어요. 물에 들어가지 말고, 모래사장 산책·조개줍기·발자국 남기기처럼 안전한 놀이로 즐겨요.</div>`;
+  html+=BEACH_SPOTS.map(s=>`<div class="card"><h3>${s.icon} ${s.title}</h3><p>${s.desc}</p></div>`).join('');
+  return html;
+}
+function infoPacking(){
+  let html=`<div class="section-title">🎒 준비물 체크리스트</div>`;
+  html+=PACKING.map(g=>{
+    const done=lsGet('packing_'+g.group, {});
+    return `<div class="card"><h3>${g.group}</h3>${g.items.map((it,i)=>{ const on=!!done[i];
+      return `<div class="chk-row ${on?'done':''}"><span class="chk-box ${on?'on':''}" onclick="togglePacking('${g.group}',${i})">${on?'✓':''}</span><span class="lbl">${it}</span></div>`; }).join('')}</div>`;
+  }).join('');
+  return html;
+}
+function togglePacking(group, i){ const key='packing_'+group; const done=lsGet(key, {}); done[i]=!done[i]; lsSet(key, done); renderAll(); }
+function infoSafety(){ return `<div class="card"><h3>🛡️ 겨울 가족여행 안전 수칙</h3>${SAFETY_RULES.map((r,i)=>`<div style="display:flex; gap:10px; padding:8px 0; ${i?'border-top:1px solid var(--line);':''}"><span style="color:var(--brass-deep); font-weight:700;">${i+1}</span><span style="font-size:13.5px;">${r}</span></div>`).join('')}</div>`; }
+function infoContacts(){
+  const stay=lsGet('stay', STAY_DEFAULT);
+  const row=(icon,name,phone,fallback)=>`<div class="contact-row"><div class="avatar">${icon}</div><div style="flex:1;"><div style="font-weight:600; font-size:14px;">${name}</div><div style="font-size:12.5px; color:var(--ink-soft);">${phone||fallback||'등록 필요'}</div></div>${phone?`<a class="callbtn" href="tel:${String(phone).replace(/[^0-9+]/g,'')}">📞</a>`:''}</div>`;
+  const mapUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(stay.address);
+  let html=`<div class="card"><h3>🏠 숙소 정보</h3><p style="font-weight:700; margin-bottom:2px;">${escapeHtml(stay.name)}</p><p style="font-size:12.5px;">${escapeHtml(stay.address)}</p><a class="btn ghost block sm" style="display:block; text-align:center; text-decoration:none; margin-top:10px;" href="${mapUrl}" target="_blank" rel="noopener">🗺️ 지도에서 보기</a></div>`;
+  const hostRow = stay.hostKakao
+    ? `<div class="contact-row"><div class="avatar">🏡</div><div style="flex:1;"><div style="font-weight:600; font-size:14px;">${escapeHtml(stay.host)} (호스트)</div><div style="font-size:12.5px; color:var(--ink-soft);">카카오톡으로 문의해주세요</div></div><a class="callbtn" style="background:#FEE500; color:#3c1e1e;" href="${escAttr(stay.hostKakao)}" target="_blank" rel="noopener">💬</a></div>`
+    : row('🏡', escapeHtml(stay.host)+' (호스트)', stay.hostPhone, '연락처 미등록');
+  html+=`<div class="card"><h3>🧑‍🤝‍🧑 호스트</h3>${hostRow}</div>`;
+  if(stay.familyOpenchat){
+    html+=`<div class="card" style="background:#fffbe8; border-color:#f5e39a;"><h3>💬 우리 가족 단체 채팅방</h3><p>여행 관련 이야기를 나누는 오픈채팅방이에요.</p><a class="btn block sm" style="display:block; text-align:center; text-decoration:none; margin-top:10px; background:#FEE500; color:#3c1e1e;" href="${escAttr(stay.familyOpenchat)}" target="_blank" rel="noopener">💬 오픈채팅방 열기</a></div>`;
+  }
+  html+=`<div class="card"><h3>🚨 긴급연락처</h3>${row('🚑','소방 · 구급', '119')} ${row('🚓','경찰', '112')} ${row('🏥','강릉아산병원 (응급실)', '', '지역 대표 종합병원 · 번호는 방문 전 검색해서 저장해두세요')}</div>`;
+  return html;
+}
+
+/* ---------- 미션 ---------- */
+function viewMission(){
+  const subtabs=[['quiz','🧩','퀴즈미션'],['stamp','🏅','스탬프'],['photo','📸','포토챌린지'],['random','🎲','랜덤미션']];
+  let body='';
+  if(ui.missionSub==='quiz') body=missionQuizHtml(); else if(ui.missionSub==='stamp') body=missionStampHtml(); else if(ui.missionSub==='photo') body=missionPhotoHtml(); else body=missionRandomHtml();
+  return `<div class="quicktabs">${subtabs.map(([id,ic,label])=>`<button class="qtab ${ui.missionSub===id?'active':''}" onclick="ui.missionSub='${id}'; renderAll();"><span class="ic">${ic}</span>${label}</button>`).join('')}</div><div class="wrap" style="padding-top:6px;">${body}</div>`;
+}
+function missionQuizHtml(){
+  const total=QUIZZES.reduce((s,q)=>s+q.points,0), score=sumQuizScore();
+  let html=`<div class="card" style="text-align:center;"><div class="serif" style="font-size:30px; color:var(--navy-800);">${score}점</div><p>내 퀴즈 점수 · 전체 ${total}점 중</p></div><div class="section-title">📍 강릉 퀴즈</div>`;
+  QUIZZES.forEach(set=>{
+    const prog=quizSetProgress(set), open=ui.openQuiz===set.id;
+    html+=`<div class="qcard"><div class="qhead" onclick="ui.openQuiz = ui.openQuiz==='${set.id}'?null:'${set.id}'; renderAll();"><div class="emo">${set.icon}</div><div style="flex:1;"><div style="font-weight:700; font-size:14.5px;">${set.place}</div><div style="font-size:12px; color:var(--ink-soft);">${prog.done}/${prog.total}문제 진행 · ${set.points}점</div></div><div style="color:var(--ink-faint);">${open?'▲':'▼'}</div></div><div class="qbody ${open?'open':''}">${set.questions.map((q,qi)=>renderQuizQuestion(set,q,qi)).join('<hr class="dashed">')}</div></div>`;
+  });
+  return html;
+}
+const QUIZ_OPTION_ORDER = {};
+function getQuizOptionOrder(qid, qi, len){
+  const key = qid+'_'+qi;
+  if(!QUIZ_OPTION_ORDER[key]){
+    const arr = Array.from({length:len}, (_,i)=>i);
+    for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+    QUIZ_OPTION_ORDER[key]=arr;
+  }
+  return QUIZ_OPTION_ORDER[key];
+}
+function renderQuizQuestion(set,q,qi){
+  const a=getQuizAnswers(); const chosen=a[quizAnswerKey(set.id,qi)]; const answered=chosen!==undefined;
+  const order=getQuizOptionOrder(set.id, qi, q.opts.length);
+  return `<div style="margin-bottom:6px;"><div style="font-size:11px; color:var(--brass-deep); font-weight:700; margin-bottom:4px;">${q.type}</div><div style="font-size:13.5px; font-weight:600; margin-bottom:9px;">${q.q}</div>
+    ${order.map(oi=>{ const opt=q.opts[oi]; let cls='qopt'; if(answered){ if(oi===q.answer) cls+=' correct'; else if(oi===chosen) cls+=' wrong'; } return `<button class="${cls}" ${answered?'disabled':''} onclick="answerQuiz('${set.id}',${qi},${oi})">${opt}</button>`; }).join('')}
+    ${answered?`<p style="font-size:12px; color:var(--ink-soft); margin-top:4px;">💡 ${q.note}</p>`:''}</div>`;
+}
+function answerQuiz(qid,qi,oi){
+  const a=getQuizAnswers(); const key=quizAnswerKey(qid,qi); if(a[key]!==undefined) return; setQuizAnswer(qid,qi,oi);
+  const set=QUIZZES.find(s=>s.id===qid); const correct=oi===set.questions[qi].answer;
+  toast(correct? '정답이에요! 🎉' : '아쉬워요, 다음 문제도 도전해봐요!');
+  if(correct) celebrate(); renderAll(); syncMyScore();
+}
+function missionStampHtml(){
+  const stamps=getStamps(), got=Object.keys(stamps).length, earnedPts=stampPointsEarned();
+  let html=`<div class="card"><h3>🏅 여행지 스탬프 랠리</h3><p>장소 근처(약 800m 이내)에 가면 GPS로 도장이 자동으로 찍혀요!</p>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr); margin-top:12px;"><div class="stat"><b>${got}</b><span>획득 도장</span></div><div class="stat"><b>${GUIDE.length}</b><span>전체 도장</span></div><div class="stat"><b>${earnedPts}</b><span>스탬프 점수</span></div></div>
+    <button class="btn gold block" style="margin-top:12px;" onclick="tryStamp()">📍 지금 위치로 도장 받기</button><div id="gpsStatus" style="font-size:12px; color:var(--ink-soft); margin-top:8px;"></div></div>`;
+  html+=`<div class="section-title">🗺️ 방문지 스탬프</div><div class="pgrid2">`+GUIDE.map(g=>{ const on=!!stamps[g.name]; return `<div class="stampcard ${on?'on':''}"><div class="stampicon">${g.icon}</div><div class="stampname">${g.name}</div><div class="stamppts">${on?'✓ 획득':'+'+g.points+'점'}</div></div>`; }).join('')+`</div>`;
+  return html;
+}
+function tryStamp(){
+  const status=document.getElementById('gpsStatus');
+  if(!navigator.geolocation){ status.textContent='이 기기에서는 위치 확인을 지원하지 않아요.'; return; }
+  status.textContent='위치 확인 중...';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude,longitude,accuracy}=pos.coords; let nearest=null, nd=Infinity;
+    GUIDE.forEach(g=>{ const dist=haversine(latitude,longitude,g.lat,g.lng); if(dist<nd){ nd=dist; nearest=g; } });
+    if(nearest && nd<=800){
+      const stamps=getStamps();
+      if(!stamps[nearest.name]){ stamps[nearest.name]=Date.now(); lsSet('stamps',stamps); toast('🎉 '+nearest.name+' 도장 획득! +'+nearest.points+'점'); celebrate(); syncMyScore(); }
+      else toast('이미 도장을 받은 곳이에요.');
+      status.textContent=`${nearest.name}까지 약 ${Math.round(nd)}m · GPS 정확도 ±${Math.round(accuracy)}m`;
+    } else if(nearest){ status.textContent=`가장 가까운 곳: ${nearest.name} (약 ${(Math.round(nd/100)/10)}km) — 800m 이내로 이동해보세요.`; }
+    renderAll();
+  }, ()=>{ status.textContent='위치 정보를 가져올 수 없어요. 위치 권한을 확인해주세요.'; }, {enableHighAccuracy:true, timeout:10000});
+}
+function missionPhotoHtml(){
+  const done=getPhotoChallenges(), doneCount=Object.keys(done).length;
+  let html=`<div class="card"><h3>📸 포토챌린지</h3><p>${doneCount}/${PHOTO_CHALLENGES.length} 완료 · 사진을 올리면 바로 완료 처리돼요!</p>
+    <div class="progress" style="margin-top:10px;"><i style="width:${doneCount/PHOTO_CHALLENGES.length*100}%"></i></div></div>`;
+  PHOTO_CHALLENGES.forEach(c=>{
+    const d=done[c.id];
+    html+=`<div class="card"><div class="row-between"><h3 style="margin:0;">${c.icon} ${c.title}</h3><span class="tag green">+${c.points}점</span></div><p style="margin-top:6px;"><span class="tag blue" style="margin-right:6px;">${c.place}</span>${c.desc}</p>
+      ${d?`<img src="${d.img}" style="width:100%; border-radius:12px; margin-top:10px; border:1px solid var(--line);"><p style="color:var(--good); font-weight:700; margin-top:6px;">✅ 완료했어요!${d.aiFeedback?` <span style="color:var(--ink-soft); font-weight:400;">— 🤖 ${escapeHtml(d.aiFeedback)}</span>`:''}</p>`
+        :`<label class="upload-box" style="display:block; margin-top:10px;" id="upl-${c.id}">📷 사진을 선택하세요<input type="file" accept="image/*" capture="environment" style="display:none" onchange="completePhotoChallenge('${c.id}', this)"></label>`}</div>`;
+  });
+  return html;
+}
+async function completePhotoChallenge(id, input){
+  const file=input.files[0]; if(!file) return; const box=document.getElementById('upl-'+id);
+  const c=PHOTO_CHALLENGES.find(x=>x.id===id);
+  try{
+    const dataUrl=await compressImage(file, 700, 0.65);
+    const apiKey=localStorage.getItem('gnfam_ai_key');
+    if(apiKey){
+      if(box) box.textContent='🤖 AI가 사진을 확인하고 있어요...';
+      const verdict=await judgePhotoWithAI(c, dataUrl, apiKey);
+      if(verdict && verdict.pass===false){
+        toast('아쉬워요: '+(verdict.feedback||'사진이 미션과 안 맞는 것 같아요. 다시 찍어볼까요?'));
+        if(box) box.textContent='📷 사진을 선택하세요';
+        return;
+      }
+      const d=getPhotoChallenges(); d[id]={img:dataUrl, ts:Date.now(), aiFeedback:verdict&&verdict.feedback?verdict.feedback:''}; lsSet('photo_challenges', d);
+      toast('AI 통과! 미션 완료! 🎉'); celebrate(); renderAll(); syncMyScore();
+      return;
+    }
+    const d=getPhotoChallenges(); d[id]={img:dataUrl, ts:Date.now()}; lsSet('photo_challenges', d);
+    toast('미션 완료! 🎉'); celebrate(); renderAll(); syncMyScore();
+  }catch(e){ toast('사진을 불러오지 못했어요. 다른 사진으로 시도해주세요.'); if(box) box.textContent='📷 사진을 선택하세요'; }
+}
+async function judgePhotoWithAI(challenge, dataUrl, apiKey){
+  // OpenAI 호환 비전 API로 사진이 미션에 맞는지 판독. 실패하면 자동 통과(auto-complete) 처리.
+  try{
+    const res=await fetch('https://api.openai.com/v1/chat/completions', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+apiKey },
+      body: JSON.stringify({
+        model:'gpt-4o-mini',
+        response_format:{type:'json_object'},
+        messages:[
+          {role:'system', content:'너는 가족 여행 앱의 사진미션 심사자야. 아이들도 보는 앱이니 친절하고 다정한 한국어로 짧게 피드백해줘. 너무 엄격하게 굴지 말고, 미션 취지에 대체로 맞으면 통과시켜줘. 반드시 JSON으로만 답해: {"pass": true/false, "feedback": "한 문장 피드백"}'},
+          {role:'user', content:[
+            {type:'text', text:`미션 제목: ${challenge.title}\n미션 설명: ${challenge.desc}\n이 사진이 미션에 맞는지 판단해줘.`},
+            {type:'image_url', image_url:{url:dataUrl}}
+          ]}
+        ],
+        max_tokens:200
+      })
+    });
+    if(!res.ok) throw new Error('API 오류');
+    const data=await res.json();
+    const content=data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if(!content) throw new Error('빈 응답');
+    const parsed=JSON.parse(content);
+    return { pass: parsed.pass!==false, feedback: parsed.feedback||'' };
+  }catch(e){
+    console.warn('AI 판독 실패, 자동 완료 처리:', e);
+    return { pass:true, feedback:'' };
+  }
+}
+function missionRandomHtml(){
+  const current=ui.randomMission;
+  const count=lsGet('random_count_'+todayStr(), 0);
+  return `<div class="card" style="text-align:center;"><h3>🎲 랜덤 미션 뽑기</h3><p>버튼을 누르면 깜짝 미션이 나타나요! <br><span style="color:var(--brass-deep); font-weight:700;">(오늘 ${count}/10회 달성)</span></p>
+    ${current?`<div style="margin:16px 0; padding:16px; background:var(--parchment); border-radius:14px;"><div style="font-size:14.5px; font-weight:700;">${escapeHtml(current.title)}</div><div class="tag" style="margin-top:8px;">+${current.points}점</div></div>
+      <button class="btn gold block" onclick="completeRandomMission()">완료했어요!</button>`
+      :`<button class="btn gold block" style="margin-top:16px;" ${count>=10?'disabled':''} onclick="drawRandomMission()">${count>=10?'오늘 도전 끝! 내일 만나요':'🎲 미션 뽑기!'}</button>`}
+  </div>`;
+}
+function drawRandomMission(){
+  if(lsGet('random_count_'+todayStr(), 0) >= 10){ toast('하루 10번까지만 가능해요!'); return; }
+  ui.randomMission=RANDOM_MISSIONS[Math.floor(Math.random()*RANDOM_MISSIONS.length)]; renderAll();
+}
+function completeRandomMission(){
+  if(!ui.randomMission) return;
+  lsSet('random_count_'+todayStr(), lsGet('random_count_'+todayStr(), 0) + 1);
+  lsSet('random_score', lsGet('random_score',0)+ui.randomMission.points);
+  toast('미션 완료! +'+ui.randomMission.points+'점'); celebrate(); ui.randomMission=null; renderAll(); syncMyScore();
+}
+
+/* ---------- 이야기(상식) ---------- */
+function viewStory(){
+  const learned=getFactsLearned();
+  let html=`<div class="wrap"><div class="card" style="text-align:center;"><div class="serif" style="font-size:30px; color:var(--navy-800);">${factsLearnedCount()}/${factsAllCount()}</div><p>강릉 이야기 배우기</p></div></div>`;
+  html+=`<div class="jpcat-grid">${GANGNEUNG_FACTS.map((c,i)=>`<button class="pill ${ui.factCat===i?'active':''}" onclick="ui.factCat=${i}; renderAll();">${c.icon} ${c.cat}</button>`).join('')}</div>`;
+  const cat=GANGNEUNG_FACTS[ui.factCat];
+  html+=`<div class="wrap" style="padding-top:6px;">`+cat.items.map((it,ii)=>{ const key=factKey(ui.factCat,ii); const on=!!learned[key];
+    return `<div class="jpcard ${on?'on':''}"><div class="jpcard-main"><div class="jpjp">${it.title}</div><div class="jpkr">${it.detail}</div></div><button class="jplearn ${on?'on':''}" onclick="toggleFactLearned(${ui.factCat},${ii})">${on?'✓ 배웠어요':'외웠어요'}</button></div>`; }).join('')+`</div>`;
+  return html;
+}
+function toggleFactLearned(ci,ii){ const key=factKey(ci,ii); const learned=getFactsLearned(); learned[key]=!learned[key]; lsSet('facts_learned', learned); renderAll(); syncMyScore(); }
+
+/* ---------- 사진 ---------- */
+function viewPhoto(){
+  const sub=ui.photoSub||'mine';
+  return `<div class="subtabs" style="padding-left:16px; padding-right:16px;">
+    <button class="pill ${sub!=='shared'?'active':''}" onclick="ui.photoSub='mine'; renderAll();">📱 내 사진</button>
+    <button class="pill ${sub==='shared'?'active':''}" onclick="ui.photoSub='shared'; renderAll();">🌍 공유 갤러리</button>
+  </div><div class="wrap" style="padding-top:6px;">${sub==='shared'? photoSharedHtml() : photoMineHtml()}</div>`;
+}
+function photoMineHtml(){
+  const photos=getMyPhotos();
+  let html=`<label class="upload-box" style="display:block;" id="uplMine">📷 사진 올리기<input type="file" accept="image/*" style="display:none" onchange="addMyPhoto(this)"></label>`;
+  if(photos.length===0){ html+=`<div class="empty">아직 올린 사진이 없어요. 첫 추억을 남겨보세요!</div>`; }
+  else{
+    html+=`<div class="pgrid" style="margin-top:14px;">`+photos.map((p,i)=>`<div class="pitem"><img src="${p.img}"><button class="pdelete" onclick="deleteMyPhoto(${i})">✕</button><div class="pcap">${new Date(p.ts).toLocaleDateString('ko-KR')}</div></div>`).join('')+`</div>`;
+  }
+  return html;
+}
+async function addMyPhoto(input){
+  const file=input.files[0]; if(!file) return;
+  try{ const dataUrl=await compressImage(file, 900, 0.7); const list=getMyPhotos(); list.push({img:dataUrl, ts:Date.now()}); lsSet('my_photos', list); toast('사진을 저장했어요!'); renderAll(); syncMyScore(); }
+  catch(e){ toast('사진을 불러오지 못했어요.'); }
+}
+function deleteMyPhoto(i){ const list=getMyPhotos(); list.splice(i,1); lsSet('my_photos', list); renderAll(); }
+function photoSharedHtml(){ return `<div id="galleryBody"><div class="empty">불러오는 중...</div></div><label class="upload-box" style="display:block; margin-top:14px;" id="uplShared">📤 공유 갤러리에 올리기<input type="file" accept="image/*" style="display:none" onchange="addSharedPhoto(this)"></label>`; }
+async function loadGallery(){
+  const body=document.getElementById('galleryBody'); if(!body) return;
+  const list=await fetchGallery();
+  if(list.length===0){ body.innerHTML=`<div class="empty">아직 공유된 사진이 없어요. 첫 추억을 올려보세요!</div>`; return; }
+  body.innerHTML=`<div class="pgrid">`+list.map((p,i)=>`<div class="pitem"><img src="${p.img}">${isAdminSession?`<button class="pdelete" onclick="deleteSharedPhoto(${i})">✕</button>`:''}<div class="pcap">${escapeHtml(p.name||'')}</div></div>`).join('')+`</div>`;
+}
+async function addSharedPhoto(input){
+  const file=input.files[0]; if(!file) return; const name=getMyName();
+  if(!name){ toast('먼저 랭킹 탭에서 이름을 등록해주세요.'); return; }
+  try{
+    const dataUrl=await compressImage(file, 900, 0.7);
+    await addGalleryPhoto({img:dataUrl, name, createdAt:Date.now()});
+    lsSet('shared_photo_count', lsGet('shared_photo_count',0)+1);
+    toast('공유 갤러리에 올렸어요! 🎉'); celebrate(); renderAll(); loadGallery(); syncMyScore();
+  }catch(e){ toast('업로드에 실패했어요.'); }
+}
+async function deleteSharedPhoto(i){
+  if(!confirm('이 사진을 삭제할까요?')) return;
+  const list=await fetchGallery(); const ok=await deleteGalleryPhotoAt(list, i);
+  if(ok){ toast('삭제했어요.'); loadGallery(); } else toast('삭제에 실패했어요.');
+}
+
+/* ---------- 랭킹 ---------- */
+function viewRank(){
+  const name=getMyName();
+  let html=`<div class="wrap">`;
+  if(!name){
+    html+=`<div class="card"><h3>👋 이름을 등록해주세요</h3><p>가족 중 누구인지 골라주세요. 점수가 자동으로 저장돼요.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">${FAMILY_DEFAULT.map(n=>`<button class="pill" onclick="registerName('${escAttr(n)}')">${n}</button>`).join('')}</div>
+      <hr class="dashed"><input type="text" id="customName" placeholder="다른 이름으로 등록"><button class="btn gold block" style="margin-top:8px;" onclick="registerName(document.getElementById('customName').value.trim())">등록</button></div>`;
+  } else {
+    html+=`<div class="card" style="text-align:center;"><p>현재 <b style="color:var(--brass-deep)">${escapeHtml(name)}</b>(으)로 참여 중이에요.</p><button class="btn ghost block sm" style="margin-top:10px;" onclick="changeMyName()">이름 바꾸기</button></div>`;
+  }
+  html+=`<div id="rankBody"><div class="empty">불러오는 중...</div></div></div>`;
+  return html;
+}
+function registerName(name){ if(!name) return; lsSet('myname', name); toast(name+'(으)로 등록했어요!'); renderAll(); syncMyScore(); }
+function changeMyName(){ if(confirm('이름을 바꾸면 이 기기의 이름 등록이 초기화돼요. 계속할까요?')){ lsSet('myname',''); renderAll(); } }
+async function loadRankBody(){
+  const body=document.getElementById('rankBody'); if(!body) return;
+  const list=await fetchRanking();
+  if(list.length===0){ body.innerHTML=`<div class="empty">아직 등록된 점수가 없어요.</div>`; return; }
+  const sorted=list.slice().sort((a,b)=>(b.totalScore||0)-(a.totalScore||0));
+  const medal=(i)=> i===0?'gold':i===1?'silver':i===2?'bronze':'';
+  body.innerHTML=`<div class="ranklist">`+sorted.map((r,i)=>`<div class="rankrow"><div class="rankno ${medal(i)}">${i+1}</div><div class="rankname">${escapeHtml(r.name)}</div><div class="rankscore">${r.totalScore||0}점</div>${isAdminSession?`<button class="rdelete" onclick="removeRanking('${escAttr(r.name)}')">✕</button>`:''}</div>`).join('')+`</div>`;
+}
+async function removeRanking(name){
+  if(!confirm(name+' 기록을 삭제할까요?')) return;
+  const ok=await deleteRankingEntry(name);
+  if(ok){ toast('삭제했어요.'); loadRankBody(); } else toast('삭제에 실패했어요.');
+}
+
+/* ---------- 설정(관리자) ---------- */
+function openAdminGate(){ openCenter(`<button class="closeX" onclick="closeModal()">✕</button><h3>🔒 설정</h3><p style="font-size:13px; color:var(--ink-soft); margin-bottom:12px;">숙소 정보와 연락처를 관리할 수 있어요.</p><input type="password" id="adminPass" placeholder="비밀번호"><button class="btn gold block" style="margin-top:12px;" onclick="checkAdminPass()">확인</button><p style="font-size:11px; color:var(--ink-faint); margin-top:10px;">기본 비밀번호: gangneung2026</p>`); }
+function checkAdminPass(){ const v=document.getElementById('adminPass').value; if(v===lsGet('admin_pass','gangneung2026')){ isAdminSession=true; closeModal(); openAdminPanel(); } else toast('비밀번호가 올바르지 않아요.'); }
+function openAdminPanel(){
+  const stay=lsGet('stay', STAY_DEFAULT);
+  openSheet(`<button class="closeX" onclick="closeModal()">✕</button><h3>⚙️ 설정</h3>
+    <label class="field">숙소 이름</label>
+    <input type="text" id="stayName" value="${escAttr(stay.name)}" style="margin-bottom:8px;">
+    <label class="field">숙소 주소</label>
+    <input type="text" id="stayAddress" value="${escAttr(stay.address)}" style="margin-bottom:8px;">
+    <hr class="dashed"><label class="field">호스트 이름</label>
+    <input type="text" id="hostName" value="${escAttr(stay.host)}" style="margin-bottom:8px;">
+    <input type="tel" id="hostPhone" placeholder="호스트 연락처 (선택)" value="${escAttr(stay.hostPhone||'')}" style="margin-bottom:8px;">
+    <input type="text" id="hostKakao" placeholder="호스트 카카오톡 1:1 링크 (선택)" value="${escAttr(stay.hostKakao||'')}">
+    <hr class="dashed"><label class="field">우리 가족 단체 오픈채팅방 링크 (선택)</label>
+    <input type="text" id="familyOpenchat" value="${escAttr(stay.familyOpenchat||'')}">
+    <hr class="dashed"><label class="field">비밀번호 변경 (선택)</label>
+    <input type="password" id="newPass" placeholder="새 비밀번호">
+    <button class="btn gold block" style="margin-top:16px;" onclick="saveAdmin()">저장</button>
+    <hr class="dashed">
+    <h4 style="margin:4px 0 4px;">☁️ 공유 갤러리 연동 (파이어베이스)</h4>
+    <p class="muted" style="font-size:12px;line-height:1.5;">
+      1) <b>firebase.google.com</b> 접속 → 무료 프로젝트 만들기<br>
+      2) 프로젝트 설정 → '웹 앱 추가' → 나오는 설정 코드(firebaseConfig) 전체를 복사<br>
+      3) 왼쪽 메뉴 'Firestore Database' 만들기 → '테스트 모드'로 시작 (누구나 읽고 쓸 수 있는 규칙이라 편하지만, 여행 끝나면 규칙을 잠그는 게 안전해요)<br>
+      4) 아래 칸에 복사한 코드를 그대로 붙여넣고 저장하면 이 기기가 그 프로젝트에 연결돼요.
+    </p>
+    <textarea id="firebaseConfigText" placeholder='예) const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "...", ... };' style="width:100%;min-height:90px;font-size:12px;"></textarea>
+    <button class="btn ghost block" style="margin-top:8px;" onclick="saveFirebaseConfig()">파이어베이스 연결 저장</button>
+    ${FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey ? `<p class="muted" style="font-size:12px;margin-top:6px;">✅ 현재 연결된 프로젝트: ${escapeHtml(FIREBASE_CONFIG.projectId||'')}</p><button class="btn ghost block" onclick="clearFirebaseConfig()">연결 해제</button>` : `<p class="muted" style="font-size:12px;margin-top:6px;">아직 연결 안 됨 (연결 전까지는 이 기기에만 저장돼요)</p>`}
+    <hr class="dashed">
+    <h4 style="margin:4px 0 4px;">🤖 AI 사진미션 판독 (선택)</h4>
+    <p class="muted" style="font-size:12px;line-height:1.5;">
+      OpenAI API 키를 넣으면 사진미션 인증 사진을 AI가 확인해줘요. 키가 없으면 지금처럼 자동으로 완료 처리돼요.
+      이 키는 <b>이 기기에만</b> 저장되고 가족 공유 저장소로는 절대 보내지 않아요.
+    </p>
+    <input type="password" id="aiKeyInput" placeholder="OpenAI API 키 (sk-... , 선택)" value="${escAttr(localStorage.getItem('gnfam_ai_key')||'')}">
+    <button class="btn ghost block" style="margin-top:8px;" onclick="saveAiKey()">AI 키 저장 (이 기기만)</button>
+    <hr class="dashed">
+    <button class="btn ghost block" style="margin-top:8px;" onclick="confirmReset()">🗑️ 이 기기 기록 초기화</button>
+  `);
+}
+function saveAdmin(){
+  const stay = {
+    name: document.getElementById('stayName').value.trim()||STAY_DEFAULT.name,
+    address: document.getElementById('stayAddress').value.trim()||STAY_DEFAULT.address,
+    host: document.getElementById('hostName').value.trim()||STAY_DEFAULT.host,
+    hostPhone: document.getElementById('hostPhone').value.trim(),
+    hostKakao: document.getElementById('hostKakao').value.trim(),
+    familyOpenchat: document.getElementById('familyOpenchat').value.trim(),
+    lat: STAY_DEFAULT.lat, lng: STAY_DEFAULT.lng,
+  };
+  lsSet('stay', stay);
+  const np=document.getElementById('newPass').value.trim(); if(np) lsSet('admin_pass', np);
+  if(firebaseReady){
+    db.collection('settings').doc('gangneung_family').set({ stay, updatedAt: Date.now() }, {merge:true}).catch(e=>console.warn("설정 전송 실패", e));
+  }
+  toast('저장했어요!'); closeModal(); renderAll();
+}
+function parseFirebaseConfigText(text){
+  // Firebase 콘솔이 보여주는 형태(순수 JSON이 아닐 수 있음)를 너그럽게 파싱
+  const out={};
+  const keys=['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'];
+  keys.forEach(k=>{
+    const re=new RegExp(k+'\\s*:\\s*["\']([^"\']*)["\']');
+    const m=text.match(re);
+    if(m) out[k]=m[1];
+  });
+  return out;
+}
+function saveFirebaseConfig(){
+  const text=document.getElementById('firebaseConfigText').value.trim();
+  if(!text){ toast('설정 코드를 먼저 붙여넣어 주세요'); return; }
+  const parsed=parseFirebaseConfigText(text);
+  if(!parsed.apiKey || !parsed.projectId){ toast('apiKey / projectId를 찾지 못했어요. 콘솔의 코드를 그대로 붙여넣어 보세요.'); return; }
+  localStorage.setItem('gnfam_firebase_config', JSON.stringify(parsed));
+  toast('연결했어요! 새로고침할게요.');
+  setTimeout(()=>location.reload(), 700);
+}
+function clearFirebaseConfig(){
+  if(!confirm('파이어베이스 연결을 해제할까요? (이 기기의 다른 기록은 그대로 남아요)')) return;
+  localStorage.removeItem('gnfam_firebase_config');
+  location.reload();
+}
+function saveAiKey(){
+  const v=document.getElementById('aiKeyInput').value.trim();
+  if(v) localStorage.setItem('gnfam_ai_key', v); else localStorage.removeItem('gnfam_ai_key');
+  toast('저장했어요! (이 기기에만)'); closeModal(); renderAll();
+}
+function confirmReset(){ if(confirm('이 기기에 저장된 모든 기록(퀴즈, 스탬프, 사진, 이야기 등)을 초기화할까요?')) resetAllData(); }
+function resetAllData(){ Object.keys(localStorage).filter(k=>k.startsWith('gnfam_')).forEach(k=>localStorage.removeItem(k)); toast('초기화했어요.'); closeModal(); renderAll(); }
+
+/* ---------- 시작 ---------- */
+function init(){
+  try{
+    if(firebaseReady){
+      db.collection('settings').doc('gangneung_family').onSnapshot(snap => {
+        if(snap.exists){ const data=snap.data(); if(data.stay) lsSet('stay', data.stay); renderAll(); }
+      });
+    }
+    renderAll();
+  }
+  catch(e){ console.error(e); document.getElementById('main').innerHTML='<div class="wrap"><div class="card"><h3>문제가 발생했어요</h3><p>'+escapeHtml(String(e.message||e))+'</p></div></div>'; }
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
