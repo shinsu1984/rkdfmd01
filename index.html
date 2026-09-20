@@ -422,10 +422,19 @@ const GANGNEUNG_FACTS = [
   ]},
 ];
 
-const DEFAULT_FIREBASE_CONFIG = { apiKey:"", authDomain:"", projectId:"", storageBucket:"", messagingSenderId:"", appId:"" };
-/* 파이어베이스 설정은 코드에 직접 넣지 않고, 관리자(⚙️ 설정) 화면에서 붙여넣어
-   이 기기의 저장소(localStorage)에 저장해요. 그래야 각자 만든 파이어베이스
-   프로젝트를 코드 수정 없이 바로 연결할 수 있어요. */
+/* 우리 가족 전용 파이어베이스 프로젝트예요(rkdfmd-39cde). 이 값이 코드에 직접 들어있어서
+   가족 누구나 앱을 열기만 하면 자동으로 같은 공유 갤러리·랭킹에 연결돼요 — 폰마다 따로
+   설정할 필요 없어요. (참고: Firebase 웹 apiKey는 원래 공개되는 값이라 코드에 있어도
+   괜찮아요. 실제 보안은 Firestore 규칙으로 지켜요.) */
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAanHAwIDbHNmjjjjccYR5Rw2FekRlfmT4",
+  authDomain: "rkdfmd-39cde.firebaseapp.com",
+  projectId: "rkdfmd-39cde",
+  storageBucket: "rkdfmd-39cde.firebasestorage.app",
+  messagingSenderId: "455379834832",
+  appId: "1:455379834832:web:ed87af6ae4f9bd6e02cbd5"
+};
+/* 그래도 필요하면 관리자(⚙️ 설정) 화면에서 다른 프로젝트 설정으로 덮어쓸 수 있게 남겨뒀어요. */
 function loadFirebaseConfig(){ try{ const v=localStorage.getItem('gnfam_firebase_config'); return v? JSON.parse(v) : DEFAULT_FIREBASE_CONFIG; }catch(e){ return DEFAULT_FIREBASE_CONFIG; } }
 const FIREBASE_CONFIG = loadFirebaseConfig();
 
@@ -992,10 +1001,8 @@ function openAdminPanel(){
     <hr class="dashed">
     <h4 style="margin:4px 0 4px;">☁️ 공유 갤러리 연동 (파이어베이스)</h4>
     <p class="muted" style="font-size:12px;line-height:1.5;">
-      1) <b>firebase.google.com</b> 접속 → 무료 프로젝트 만들기<br>
-      2) 프로젝트 설정 → '웹 앱 추가' → 나오는 설정 코드(firebaseConfig) 전체를 복사<br>
-      3) 왼쪽 메뉴 'Firestore Database' 만들기 → '테스트 모드'로 시작 (누구나 읽고 쓸 수 있는 규칙이라 편하지만, 여행 끝나면 규칙을 잠그는 게 안전해요)<br>
-      4) 아래 칸에 복사한 코드를 그대로 붙여넣고 저장하면 이 기기가 그 프로젝트에 연결돼요.
+      우리 가족 전용 파이어베이스 프로젝트가 앱에 이미 내장돼 있어요. 가족 누구나 앱을 열기만 하면 자동으로 같은 갤러리·랭킹을 공유해요 — 따로 설정할 필요 없어요.
+      (다른 프로젝트로 바꾸고 싶을 때만 아래에 새 설정 코드를 붙여넣으세요.) 여행 끝나고 나면 Firebase 콘솔 → Firestore → 규칙 탭에서 <code>allow read, write: if false;</code>로 잠가두는 걸 추천해요.
     </p>
     <textarea id="firebaseConfigText" placeholder='예) const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "...", ... };' style="width:100%;min-height:90px;font-size:12px;"></textarea>
     <button class="btn ghost block" style="margin-top:8px;" onclick="saveFirebaseConfig()">파이어베이스 연결 저장</button>
@@ -1050,7 +1057,7 @@ function saveFirebaseConfig(){
   setTimeout(()=>location.reload(), 700);
 }
 function clearFirebaseConfig(){
-  if(!confirm('파이어베이스 연결을 해제할까요? (이 기기의 다른 기록은 그대로 남아요)')) return;
+  if(!confirm('직접 붙여넣은 연결을 지우고, 앱에 기본으로 내장된 우리 가족 프로젝트로 되돌릴까요? (이 기기의 다른 기록은 그대로 남아요)')) return;
   localStorage.removeItem('gnfam_firebase_config');
   location.reload();
 }
