@@ -812,36 +812,15 @@ function missionPhotoHtml(){
   PHOTO_CHALLENGES.forEach(c=>{
     const d=done[c.id];
     html+=`<div class="card"><div class="row-between"><h3 style="margin:0;">${c.icon} ${c.title}</h3><span class="tag green">+${c.points}점</span></div><p style="margin-top:6px;"><span class="tag blue" style="margin-right:6px;">${c.place}</span>${c.desc}</p>
-      ${d?`<div style="position:relative;"><img src="${d.img}" style="width:100%; border-radius:12px; margin-top:10px; border:1px solid var(--line);"><button class="pdelete" onclick="retakePhotoChallenge('${c.id}')" title="다시 찍기">✕</button></div><p style="color:var(--good); font-weight:700; margin-top:6px;">✅ 완료했어요!${d.aiFeedback?` <span style="color:var(--ink-soft); font-weight:400;">— 🤖 ${escapeHtml(d.aiFeedback)}</span>`:''}</p><button class="btn ghost block sm" style="margin-top:4px;" onclick="retakePhotoChallenge('${c.id}')">🔄 잘못 올렸어요, 다시 찍기</button>`
+      ${d?`<div style="position:relative;"><img src="${d.img}" style="width:100%; border-radius:12px; margin-top:10px; border:1px solid var(--line);"><button class="pdelete" onclick="retakePhotoChallenge('${c.id}')" title="다시 찍기">✕</button></div><p style="color:var(--good); font-weight:700; margin-top:6px;">✅ 완료했어요!</p><button class="btn ghost block sm" style="margin-top:4px;" onclick="retakePhotoChallenge('${c.id}')">🔄 잘못 올렸어요, 다시 찍기</button>`
         :`<label class="upload-box" style="display:block; margin-top:10px;" id="upl-${c.id}">📷 사진을 선택하세요<input type="file" accept="image/*" capture="environment" style="display:none" onchange="completePhotoChallenge('${c.id}', this)"></label>`}</div>`;
   });
   return html;
 }
 async function completePhotoChallenge(id, input){
   const file=input.files[0]; if(!file) return; const box=document.getElementById('upl-'+id);
-  const c=PHOTO_CHALLENGES.find(x=>x.id===id);
   try{
     const dataUrl=await compressImage(file, 700, 0.65);
-    const apiKey=localStorage.getItem('gnfam_ai_key');
-    if(apiKey){
-      if(box) box.textContent='🤖 AI가 사진을 확인하고 있어요...';
-      const verdict=await judgePhotoWithAI(c, dataUrl, apiKey);
-      if(verdict.ok===false){
-        // AI 호출 자체가 실패한 경우(키 오류, 네트워크 등) — 일단 완료 처리하되, 실패했다는 걸 분명히 알려줘요.
-        const d=getPhotoChallenges(); d[id]={img:dataUrl, ts:Date.now(), aiFeedback:''}; lsSet('photo_challenges', d);
-        toast('⚠️ AI 확인 실패라서 우선 완료 처리했어요. 오류: '+verdict.error);
-        celebrate(); renderAll(); syncMyScore();
-        return;
-      }
-      if(verdict.pass===false){
-        toast('아쉬워요: '+(verdict.feedback||'사진이 미션과 안 맞는 것 같아요. 다시 찍어볼까요?'));
-        if(box) box.textContent='📷 사진을 선택하세요';
-        return;
-      }
-      const d=getPhotoChallenges(); d[id]={img:dataUrl, ts:Date.now(), aiFeedback:verdict.feedback||''}; lsSet('photo_challenges', d);
-      toast('AI 통과! 미션 완료! 🎉'); celebrate(); renderAll(); syncMyScore();
-      return;
-    }
     const d=getPhotoChallenges(); d[id]={img:dataUrl, ts:Date.now()}; lsSet('photo_challenges', d);
     toast('미션 완료! 🎉'); celebrate(); renderAll(); syncMyScore();
   }catch(e){ toast('사진을 불러오지 못했어요. 다른 사진으로 시도해주세요.'); if(box) box.textContent='📷 사진을 선택하세요'; }
@@ -850,65 +829,6 @@ function retakePhotoChallenge(id){
   if(!confirm('이 미션 사진을 지우고 다시 찍을까요?')) return;
   const d=getPhotoChallenges(); delete d[id]; lsSet('photo_challenges', d);
   toast('삭제했어요. 다시 찍어보세요!'); renderAll(); syncMyScore();
-}
-const GEMINI_MODEL = 'gemini-2.5-flash'; // 다른 모델을 쓰고 싶으면 이 이름만 바꾸면 돼요 (예: 'gemini-2.0-flash')
-async function judgePhotoWithAI(challenge, dataUrl, apiKey){
-  // 구글 Gemini 비전 API로 사진이 미션에 맞는지 판독. 호출 자체가 실패하면 ok:false와 이유를 함께 돌려줘요.
-  try{
-    const commaIdx=dataUrl.indexOf(',');
-    const mimeMatch=dataUrl.slice(0,commaIdx).match(/data:(.*?);base64/);
-    const mimeType=mimeMatch? mimeMatch[1] : 'image/jpeg';
-    const base64Data=dataUrl.slice(commaIdx+1);
-    const prompt=`너는 가족 여행 앱의 사진미션 심사자야. 아이들도 보는 앱이니 친절하고 다정한 한국어로 짧게 피드백해줘. 너무 엄격하게 굴지 말고, 미션 취지에 대체로 맞으면 통과시켜줘.
-미션 제목: ${challenge.title}
-미션 설명: ${challenge.desc}
-이 사진이 미션에 맞는지 판단해서 반드시 아래 JSON 형식으로만 답해:
-{"pass": true 또는 false, "feedback": "한 문장 피드백"}`;
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        contents:[{ parts:[ {text:prompt}, {inline_data:{mime_type:mimeType, data:base64Data}} ] }],
-        generationConfig:{ responseMimeType:'application/json', maxOutputTokens:200 }
-      })
-    });
-    if(!res.ok){
-      let detail='';
-      try{ const errJson=await res.json(); detail=(errJson.error && errJson.error.message) || ''; }catch(e2){}
-      throw new Error('HTTP '+res.status+(detail? ' - '+detail : ''));
-    }
-    const data=await res.json();
-    const content=data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
-    if(!content) throw new Error('빈 응답(모델이 결과를 안 줬어요)');
-    const parsed=JSON.parse(content);
-    return { ok:true, pass: parsed.pass!==false, feedback: parsed.feedback||'' };
-  }catch(e){
-    const msg=String(e && e.message || e);
-    console.warn('AI 판독 실패:', msg);
-    return { ok:false, pass:true, feedback:'', error: msg };
-  }
-}
-async function testAiConnection(){
-  const key=(document.getElementById('aiKeyInput')&&document.getElementById('aiKeyInput').value.trim()) || localStorage.getItem('gnfam_ai_key');
-  if(!key){ toast('먼저 위에 Gemini 키를 입력해주세요'); return; }
-  openCenter(`<h3>🤖 연결 테스트 중...</h3><p style="font-size:13px; color:var(--ink-soft);">잠시만 기다려주세요.</p>`);
-  try{
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ contents:[{ parts:[{text:'연결 확인용 테스트야. "정상 연결됐어요!"라고만 답해줘.'}] }] })
-    });
-    if(!res.ok){
-      let detail='';
-      try{ const errJson=await res.json(); detail=(errJson.error && errJson.error.message) || JSON.stringify(errJson).slice(0,300); }catch(e2){}
-      openCenter(`<button class="closeX" onclick="closeModal()">✕</button><h3>❌ 연결 실패</h3><p style="font-size:12.5px; color:var(--ink-soft); white-space:pre-wrap; word-break:break-all;">상태 코드: ${res.status}\n${escapeHtml(detail)}</p><p style="font-size:12.5px; margin-top:8px;">키가 정확한지, aistudio.google.com에서 발급한 키가 맞는지 확인해보세요.</p>`);
-      return;
-    }
-    const data=await res.json();
-    const text=(data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || '(응답 내용 없음)';
-    openCenter(`<button class="closeX" onclick="closeModal()">✕</button><h3>✅ 연결 성공!</h3><p style="font-size:13px; color:var(--ink-soft);">Gemini 응답: ${escapeHtml(text)}</p><p style="font-size:12.5px; margin-top:8px; color:var(--ink-soft);">이제 사진미션 인증 사진을 올리면 실제로 AI가 확인해줘요.</p>`);
-  }catch(e){
-    openCenter(`<button class="closeX" onclick="closeModal()">✕</button><h3>❌ 연결 실패</h3><p style="font-size:12.5px; color:var(--ink-soft); white-space:pre-wrap; word-break:break-all;">${escapeHtml(String(e.message||e))}</p><p style="font-size:12.5px; margin-top:8px;">네트워크 문제이거나, 브라우저가 이 요청을 막았을 수 있어요.</p>`);
-  }
 }
 function missionRandomHtml(){
   const current=ui.randomMission;
@@ -1047,15 +967,6 @@ function openAdminPanel(){
     <button class="btn ghost block" style="margin-top:8px;" onclick="saveFirebaseConfig()">파이어베이스 연결 저장</button>
     ${FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey ? `<p class="muted" style="font-size:12px;margin-top:6px;">✅ 현재 연결된 프로젝트: ${escapeHtml(FIREBASE_CONFIG.projectId||'')}</p><button class="btn ghost block" onclick="clearFirebaseConfig()">연결 해제</button>` : `<p class="muted" style="font-size:12px;margin-top:6px;">아직 연결 안 됨 (연결 전까지는 이 기기에만 저장돼요)</p>`}
     <hr class="dashed">
-    <h4 style="margin:4px 0 4px;">🤖 AI 사진미션 판독 (선택 · Gemini)</h4>
-    <p class="muted" style="font-size:12px;line-height:1.5;">
-      구글 Gemini API 키를 넣으면 사진미션 인증 사진을 AI가 확인해줘요 (aistudio.google.com에서 발급). 키가 없으면 지금처럼 자동으로 완료 처리돼요.
-      ${firebaseReady? '파이어베이스가 연결돼 있어서, 한 번만 저장하면 <b>가족 모두의 폰</b>에 자동으로 전달돼요.' : '아직 파이어베이스 연동 전이라 <b>이 기기에만</b> 적용돼요. 가족 전체에 적용하려면 먼저 위에서 파이어베이스를 연결해주세요.'}
-    </p>
-    <input type="password" id="aiKeyInput" placeholder="Gemini API 키 (AIza... , 선택)" value="${escAttr(localStorage.getItem('gnfam_ai_key')||'')}">
-    <button class="btn ghost block" style="margin-top:8px;" onclick="saveAiKey()">AI 키 저장${firebaseReady? ' (가족 전체 적용)' : ' (이 기기만)'}</button>
-    <button class="btn ghost block" style="margin-top:8px;" onclick="testAiConnection()">🔌 연결 테스트</button>
-    <hr class="dashed">
     <button class="btn ghost block" style="margin-top:8px;" onclick="confirmReset()">🗑️ 이 기기 기록 초기화</button>
   `);
 }
@@ -1101,19 +1012,6 @@ function clearFirebaseConfig(){
   localStorage.removeItem('gnfam_firebase_config');
   location.reload();
 }
-function saveAiKey(){
-  const v=document.getElementById('aiKeyInput').value.trim();
-  if(v) localStorage.setItem('gnfam_ai_key', v); else localStorage.removeItem('gnfam_ai_key');
-  if(firebaseReady){
-    // 우리 가족만 쓰는 개인 프로젝트라, 가족 모두의 폰에 AI 키가 자동으로 전달되도록
-    // 공유 설정 문서에도 함께 저장해요. (다른 남과 공유되는 게 아니라 우리 가족 파이어베이스 안에서만 공유돼요)
-    db.collection('settings').doc('gangneung_family').set({ aiKey: v||null, updatedAt: Date.now() }, {merge:true}).catch(e=>console.warn('AI 키 전송 실패', e));
-    toast('저장했어요! 가족 모두의 폰에 곧 반영돼요.');
-  } else {
-    toast('저장했어요! (파이어베이스 연동 전이라 이 기기에만 적용돼요)');
-  }
-  closeModal(); renderAll();
-}
 function confirmReset(){ if(confirm('이 기기에 저장된 모든 기록(퀴즈, 스탬프, 사진, 이야기 등)을 초기화할까요?')) resetAllData(); }
 function resetAllData(){ Object.keys(localStorage).filter(k=>k.startsWith('gnfam_')).forEach(k=>localStorage.removeItem(k)); toast('초기화했어요.'); closeModal(); renderAll(); }
 
@@ -1125,8 +1023,6 @@ function init(){
         if(snap.exists){
           const data=snap.data();
           if(data.stay) lsSet('stay', data.stay);
-          if(data.aiKey) localStorage.setItem('gnfam_ai_key', data.aiKey);
-          else if(data.aiKey===null) localStorage.removeItem('gnfam_ai_key');
           renderAll();
         }
       });
