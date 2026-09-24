@@ -69,12 +69,12 @@ button{font-family:inherit;}
   background:radial-gradient(circle, rgba(255,255,255,.9) 1.6px, transparent 1.7px) repeat-x; background-size:16px 14px; background-position:0 2px; opacity:.8;}
 
 /* 하단 메인 탭 */
-.bottomnav{ position:sticky; bottom:0; z-index:20; display:grid; grid-template-columns:repeat(6,1fr);
+.bottomnav{ position:sticky; bottom:0; z-index:20; display:grid; grid-template-columns:repeat(7,1fr);
   background:var(--paper); border-top:1px solid var(--line); padding:8px 2px calc(8px + var(--safe-b));
   box-shadow:0 -6px 20px -14px rgba(10,20,40,.25);}
 .navbtn{ background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
-  padding:4px 1px; color:var(--ink-faint); font-size:9.6px; cursor:pointer; border-radius:10px;}
-.navbtn .ic{font-size:17px; line-height:1;}
+  padding:4px 1px; color:var(--ink-faint); font-size:8.6px; cursor:pointer; border-radius:10px;}
+.navbtn .ic{font-size:15.5px; line-height:1;}
 .navbtn.active{color:var(--brass-deep); font-weight:700;}
 
 /* 가로 스크롤 필 */
@@ -226,7 +226,7 @@ label.field{display:block; font-size:12px; color:var(--ink-soft); margin:0 0 6px
    설정 데이터 — 우리 가족 강릉 겨울여행
    ========================================================================= */
 const TRIP = {
-  title: '우리 가족 강릉 겨울여행', subtitle: '아빠·엄마·5학년·4학년·2학년',
+  title: '우리 가족 강릉 겨울여행', subtitle: '상운이·지연이·수윤이·서윤이·다윤이',
   theme: '겨울바다 · 눈꽃 · 가족 추억여행', startDate: '2026-12-28', endDate: '2026-12-31',
   emoji:'❄️', checkinTime:'오후 3:00', checkoutTime:'오전 11:00',
 };
@@ -234,7 +234,7 @@ const STAY_DEFAULT = {
   name:'강릉시의 방', host:'비비르 알 디아', address:'강원 강릉시 사천진리 진리항구2길 5 (사천진해변 바로 앞)',
   lat:37.8286, lng:128.8654, hostPhone:'', hostKakao:'', familyOpenchat:''
 };
-const FAMILY_DEFAULT = ['아빠','엄마','신수윤','신서윤','신다윤'];
+const FAMILY_DEFAULT = ['상운이','지연이','수윤이','서윤이','다윤이'];
 
 /* '가볼 곳' 스탬프 랠리 — 우리가 실제로 가면 좋은 강릉 명소. lat/lng는 GPS 도장(스탬프)용 근사 좌표예요. */
 const GUIDE = [
@@ -248,6 +248,26 @@ const GUIDE = [
   {name:'주문진항', area:'주문진', lat:37.8967, lng:128.8236, icon:'🦑', points:15, desc:'활기찬 어항으로, 싱싱한 해산물과 오징어난전 구경하는 재미가 있어요.', tip:'바닥이 미끄러운 곳이 많으니 천천히, 조심히 걸어요.'},
   {name:'경포호수', area:'경포', lat:37.7963, lng:128.8963, icon:'🦢', points:15, desc:'겨울엔 고니(백조) 같은 철새들이 찾아오는 호수예요. 호숫가를 따라 산책하기 좋아요.', tip:'철새를 놀라게 하지 않도록 조용히, 멀리서 관찰해요.'},
   {name:'강릉올림픽파크 (스피드스케이팅경기장)', area:'교동', lat:37.6987, lng:128.7602, icon:'⛸️', points:20, desc:'2018 평창 동계올림픽 스피드스케이팅 경기가 열렸던 곳으로, 지금도 스케이트를 탈 수 있어요.', tip:'운영 시간·이용료는 방문 전 강릉올림픽파크 홈페이지에서 꼭 확인하세요.'},
+];
+
+/* "사전연습" 탭 — 강릉 가기 전에 우리 동네(집현면)에서 GPS 스탬프가 잘 작동하는지
+   미리 테스트해보는 용도예요. 강릉 스탬프(GUIDE)와는 완전히 별개의 목록·저장키(prestamps2).
+   좌표는 처음엔 다 "미등록" 상태(0,0 placeholder)로 시작해요 — 실제 위치를 지도 API 없이
+   추정하면 늘 틀리기 때문에(예전에 학교 앱에서 겪음), 아래 registerPreSpot()으로 그 자리에
+   가서 직접 등록하는 방식으로만 정확한 좌표가 들어가요. 이름은 관리자 설정에서 바로 바꿀 수
+   있어요 — 실제로 없는 곳이면 이름만 바꿔서 써도 돼요. */
+const PRE_STAMP_RADIUS = 100; // 미터 (여기에 GPS 오차를 최대 50m까지 더해서 판정)
+const PRE_STAMPS = [
+  {name:'집현초등학교', icon:'🏫', lat:0, lng:0, points:10, desc:'우리 동네 초등학교예요.'},
+  {name:'집현면사무소', icon:'🏛️', lat:0, lng:0, points:10, desc:'우리 동네의 여러 행정업무를 처리하는 곳이에요.'},
+  {name:'집현면 CU', icon:'🏪', lat:0, lng:0, points:10, desc:'동네 편의점이에요.'},
+  {name:'집현우체국', icon:'📮', lat:0, lng:0, points:10, desc:'편지와 택배를 보내고 받는 곳이에요.'},
+  {name:'집현농협', icon:'🏦', lat:0, lng:0, points:10, desc:'동네 어른들이 자주 오가시는 곳이에요.'},
+  {name:'집현지구대', icon:'🚓', lat:0, lng:0, points:10, desc:'우리 동네를 지켜주는 경찰관들이 계신 곳이에요.'},
+  {name:'집현보건지소', icon:'🏥', lat:0, lng:0, points:10, desc:'다치거나 아플 때 도움을 받을 수 있는 곳이에요.'},
+  {name:'집현버스정류장', icon:'🚌', lat:0, lng:0, points:10, desc:'버스를 타고 내리는 우리 동네 정류장이에요.'},
+  {name:'집현마을회관', icon:'🏘️', lat:0, lng:0, points:10, desc:'동네 어르신들이 모이시는 곳이에요.'},
+  {name:'집현놀이터', icon:'🛝', lat:0, lng:0, points:10, desc:'우리가 자주 노는 놀이터예요.'},
 ];
 
 /* 맛집(식당) — 아이와 함께 가기 좋은 곳 위주 */
@@ -567,7 +587,7 @@ function factsAllCount(){ return GANGNEUNG_FACTS.reduce((s,c)=>s+c.items.length,
 function factsLearnedCount(){ return Object.values(getFactsLearned()).filter(Boolean).length; }
 async function syncMyScore(){
   const name=getMyName(); if(!name) return;
-  const quiz=sumQuizScore(), challengeScore=sumPhotoScore(), stampPts=stampPointsEarned();
+  const quiz=sumQuizScore(), challengeScore=sumPhotoScore(), stampPts=stampPointsEarned()+preStampPointsEarned();
   const factPts = factsLearnedCount() * 5;
   const uploadPts = photoUploadScore();
   let photoScore = challengeScore + uploadPts;
@@ -595,7 +615,7 @@ async function syncMyScore(){
    화면 상태 & 렌더링
    ========================================================================= */
 const ui = { tab:'home', missionSub:'quiz', infoSub:'course', photoSub:'mine', factCat:0, openQuiz:null, randomMission:null };
-const TABS = [ {id:'home',label:'홈',icon:'🏠'}, {id:'info',label:'정보',icon:'ℹ️'}, {id:'mission',label:'미션',icon:'🧩'}, {id:'photo',label:'사진',icon:'📷'}, {id:'story',label:'이야기',icon:'📖'}, {id:'rank',label:'랭킹',icon:'🏆'} ];
+const TABS = [ {id:'home',label:'홈',icon:'🏠'}, {id:'info',label:'정보',icon:'ℹ️'}, {id:'mission',label:'미션',icon:'🧩'}, {id:'pretest',label:'사전연습',icon:'📍'}, {id:'photo',label:'사진',icon:'📷'}, {id:'story',label:'이야기',icon:'📖'}, {id:'rank',label:'랭킹',icon:'🏆'} ];
 const INFO_TABS = [ ['course','🗓️ 추천코스'],['guide','🗺️ 가볼곳'],['nearby','🚗 근교나들이'],['reststop','🛣️ 오는길휴게소'],['food','🍜 맛집'],['cafe','☕ 카페'],['snow','❄️ 눈꽃여행'],['beach','🌊 바다놀이'],['packing','🎒 준비물'],['safety','⚠️ 안전수칙'],['contacts','📞 연락처'] ];
 
 function setTab(id){ ui.tab=id; renderAll(); window.scrollTo(0,0); }
@@ -607,7 +627,7 @@ function renderBottomNav(){ document.getElementById('bottomnav').innerHTML=TABS.
 function renderAll(){
   try{
     renderHero(); renderBottomNav(); const main=document.getElementById('main');
-    if(ui.tab==='home') main.innerHTML=viewHome(); else if(ui.tab==='mission') main.innerHTML=viewMission(); else if(ui.tab==='story') main.innerHTML=viewStory(); else if(ui.tab==='rank') main.innerHTML=viewRank(); else if(ui.tab==='photo') main.innerHTML=viewPhoto(); else main.innerHTML=viewInfo();
+    if(ui.tab==='home') main.innerHTML=viewHome(); else if(ui.tab==='mission') main.innerHTML=viewMission(); else if(ui.tab==='pretest') main.innerHTML=viewPretest(); else if(ui.tab==='story') main.innerHTML=viewStory(); else if(ui.tab==='rank') main.innerHTML=viewRank(); else if(ui.tab==='photo') main.innerHTML=viewPhoto(); else main.innerHTML=viewInfo();
     afterRender();
   }catch(e){ console.error(e); document.getElementById('main').innerHTML=`<div class="wrap"><div class="card"><h3>⚠️ 문제가 발생했어요</h3><p>${escapeHtml(String(e.message||e))}</p></div></div>`; }
 }
@@ -796,14 +816,112 @@ function tryStamp(){
   navigator.geolocation.getCurrentPosition(pos=>{
     const {latitude,longitude,accuracy}=pos.coords; let nearest=null, nd=Infinity;
     GUIDE.forEach(g=>{ const dist=haversine(latitude,longitude,g.lat,g.lng); if(dist<nd){ nd=dist; nearest=g; } });
+    let msg='';
     if(nearest && nd<=800){
       const stamps=getStamps();
       if(!stamps[nearest.name]){ stamps[nearest.name]=Date.now(); lsSet('stamps',stamps); toast('🎉 '+nearest.name+' 도장 획득! +'+nearest.points+'점'); celebrate(); syncMyScore(); }
       else toast('이미 도장을 받은 곳이에요.');
-      status.textContent=`${nearest.name}까지 약 ${Math.round(nd)}m · GPS 정확도 ±${Math.round(accuracy)}m`;
-    } else if(nearest){ status.textContent=`가장 가까운 곳: ${nearest.name} (약 ${(Math.round(nd/100)/10)}km) — 800m 이내로 이동해보세요.`; }
+      msg=`${nearest.name}까지 약 ${Math.round(nd)}m · GPS 정확도 ±${Math.round(accuracy)}m`;
+    } else if(nearest){ msg=`가장 가까운 곳: ${nearest.name} (약 ${(Math.round(nd/100)/10)}km) — 800m 이내로 이동해보세요.`; }
+    // renderAll()이 화면을 다시 그리면서 #gpsStatus 노드가 새로 생기므로, 렌더링 후 다시 찾아서 넣어야 실제로 보임.
     renderAll();
-  }, ()=>{ status.textContent='위치 정보를 가져올 수 없어요. 위치 권한을 확인해주세요.'; }, {enableHighAccuracy:true, timeout:10000});
+    const status2=document.getElementById('gpsStatus'); if(status2) status2.textContent=msg;
+  }, ()=>{ const s=document.getElementById('gpsStatus'); if(s) s.textContent='위치 정보를 가져올 수 없어요. 위치 권한을 확인해주세요.'; }, {enableHighAccuracy:true, timeout:10000});
+}
+/* ---------- 사전연습: 우리 동네(집현면) GPS 스탬프 미리 테스트 ---------- */
+function getPreStamps(){ return lsGet('prestamps2', {}); }
+/* 누군가 현장에서 등록한 좌표(pre_stamp_spots)가 있으면 그걸, 없으면 기본값(미등록 상태)을 씀 */
+function getPreStampList(){
+  const v=lsGet('pre_stamp_spots', null);
+  return (Array.isArray(v) && v.length) ? v : PRE_STAMPS;
+}
+function preStampReady(){ return getPreStampList().every(g=>g.set); }
+function preStampPointsEarned(){ const st=getPreStamps(); return getPreStampList().reduce((s,g)=> s+(st[g.name]? (g.points||10):0), 0); }
+function fmtDist(m){ return m<1000 ? Math.round(m)+'m' : (Math.round(m/100)/10)+'km'; }
+function tryPreStamp(){
+  const status=document.getElementById('preGpsStatus');
+  if(!navigator.geolocation){ status.textContent='이 기기에서는 위치 확인을 지원하지 않아요.'; return; }
+  status.textContent='위치 확인 중... (바깥에서 잠시 기다려주세요)';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude,longitude,accuracy}=pos.coords; let nearest=null, nd=Infinity;
+    const list=getPreStampList();
+    list.forEach(g=>{ const dist=haversine(latitude,longitude,g.lat,g.lng); if(dist<nd){ nd=dist; nearest=g; } });
+    const limit = PRE_STAMP_RADIUS + Math.min(accuracy||0, 50); // GPS 오차를 최대 50m까지 봐줌
+    let msg='';
+    if(nearest && nd<=limit && nearest.set){
+      const st=getPreStamps();
+      if(!st[nearest.name]){ st[nearest.name]=Date.now(); lsSet('prestamps2',st); toast('🎉 '+nearest.name+' 스탬프 획득! +'+(nearest.points||10)+'점'); celebrate(); syncMyScore(); }
+      else toast('이미 스탬프를 받은 곳이에요.');
+      msg=`${nearest.name}까지 약 ${Math.round(nd)}m · GPS 정확도 ±${Math.round(accuracy)}m`;
+    } else if(nearest){
+      msg=`가장 가까운 곳: ${nearest.name} (약 ${fmtDist(nd)}) — ${PRE_STAMP_RADIUS}m 이내로 가까이 가보세요.`;
+      if(!nearest.set) msg='아직 등록된 장소가 없어요. 관리자 설정에서 그 장소에 가서 위치를 등록해주세요.';
+    }
+    renderAll();
+    const status2=document.getElementById('preGpsStatus'); if(status2) status2.textContent=msg;
+  }, ()=>{ const s=document.getElementById('preGpsStatus'); if(s) s.textContent='위치 정보를 가져올 수 없어요. 위치 권한을 확인해주세요.'; }, {enableHighAccuracy:true, timeout:15000, maximumAge:0});
+}
+function viewPretest(){
+  const preStamps=getPreStamps(), preList=getPreStampList(), donePs=preList.filter(g=>preStamps[g.name]).length;
+  let html=`<div class="wrap">
+    <div class="banner info">📍 <b>사전연습</b> · 강릉 가기 전에 우리 동네(집현면)에서 GPS 스탬프가 잘 되는지 미리 테스트해봐요. 강릉 스탬프와는 완전히 별개예요.</div>
+    <div class="card"><h3>🚩 우리 동네 GPS 테스트</h3>
+      <div class="stats" style="grid-template-columns:repeat(3,1fr); margin-top:10px;"><div class="stat"><b>${donePs}</b><span>획득</span></div><div class="stat"><b>${preList.length}</b><span>전체</span></div><div class="stat"><b>${preStampPointsEarned()}</b><span>스탬프 점수</span></div></div>
+      <p style="margin-top:10px;">아래 장소 바로 앞(약 ${PRE_STAMP_RADIUS}m 이내)에 가서 버튼을 누르면 GPS로 스탬프가 찍혀요.</p>
+      ${preStampReady()?'':`<div class="banner" style="margin-top:10px;">⏳ 아직 위치가 등록되지 않은 장소가 있어요. ⚙️설정 → "우리 동네 스탬프 위치 등록"에서 그 자리에 가서 등록해주세요.</div>`}
+      <button class="btn gold block" style="margin-top:10px;" onclick="tryPreStamp()">📍 지금 위치로 스탬프 받기</button>
+      <div id="preGpsStatus" style="font-size:12px; color:var(--ink-soft); margin-top:8px;"></div>
+      ${donePs===preList.length?`<div class="banner" style="margin-top:10px;">🎉 우리 동네 스탬프를 다 모았어요!</div>`:''}
+    </div>
+    <div class="section-title">🗺️ 우리 동네 스탬프</div>
+    <div class="pgrid2">${preList.map(g=>{ const on=!!preStamps[g.name]; return `<div class="stampcard ${on?'on':''}"><div class="stampicon">${g.icon}</div><div class="stampname">${g.name}${g.set?'':' (미등록)'}</div><div class="stamppts">${on?'✓ 획득':'+'+(g.points||10)+'점'}</div></div>`; }).join('')}</div>
+  </div>`;
+  return html;
+}
+/* ---------- 관리자: 우리 동네 스탬프 위치를 현장에서 등록 ----------
+   그 장소 앞에 서서 버튼을 누르면 GPS 좌표가 바로 저장되고, Firestore로 다른 가족 폰에도 반영돼요. */
+function savePreSpots(list){
+  lsSet('pre_stamp_spots', list);
+  if(firebaseReady){
+    db.collection('settings').doc('gangneung_family').set({ pre_stamp_spots: list, updatedAt: Date.now() }, {merge:true})
+      .catch(e=>{ console.warn('스탬프 위치 전송 실패', e); toast('⚠️ 서버 전송 실패 — 인터넷 연결을 확인해주세요.'); });
+  }
+}
+function preSpotsFromPanel(){
+  const list=getPreStampList().map(g=>({...g}));
+  document.querySelectorAll('.psName').forEach(el=>{ const i=Number(el.dataset.idx); if(list[i]){ const v=el.value.trim(); if(v) list[i].name=v; } });
+  return list;
+}
+function preSpotStatusHtml(g){
+  return g.set
+    ? `<span style="color:var(--good); font-weight:700;">✅ 등록됨</span> <span style="color:var(--ink-faint);">(${Number(g.lat).toFixed(5)}, ${Number(g.lng).toFixed(5)}${g.acc?` · ±${g.acc}m`:''})</span>`
+    : `<span style="color:var(--stamp); font-weight:700;">⚠️ 아직 등록 안 됨</span> <span style="color:var(--ink-faint);">— 그 장소 앞에서 눌러주세요</span>`;
+}
+function registerPreSpot(i){
+  if(!navigator.geolocation){ toast('이 기기에서는 위치 확인을 지원하지 않아요.'); return; }
+  const line=document.getElementById('psStatus'+i); if(line) line.innerHTML='📡 위치 확인 중... 건물 앞 바깥에서 잠시 기다려주세요';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude,longitude,accuracy}=pos.coords;
+    const list=preSpotsFromPanel();
+    list[i]={...list[i], lat:Number(latitude.toFixed(6)), lng:Number(longitude.toFixed(6)), set:true, acc:Math.round(accuracy)};
+    savePreSpots(list);
+    const l2=document.getElementById('psStatus'+i); if(l2) l2.innerHTML=preSpotStatusHtml(list[i]);
+    if(accuracy>60) toast(`⚠️ GPS 오차가 커요(±${Math.round(accuracy)}m). 건물 밖 하늘이 보이는 곳에서 한 번 더 눌러주세요.`);
+    else toast(`📍 ${list[i].name} 위치를 등록했어요!`);
+  }, ()=>{ const l3=document.getElementById('psStatus'+i); if(l3) l3.innerHTML='❌ 위치를 가져오지 못했어요. 위치 권한을 확인해주세요.'; }, {enableHighAccuracy:true, timeout:20000, maximumAge:0});
+}
+function preSpotsAdminHtml(){
+  const list=getPreStampList();
+  return `<label class="field">📍 우리 동네 스탬프 위치 등록 (사전연습)</label>
+    <p style="font-size:11.5px; color:var(--ink-soft); margin:0 0 10px; line-height:1.5;">각 장소 <b>바로 앞(건물 밖)</b>에 서서 <b>"지금 여기로 등록"</b>을 누르면 GPS 위치가 저장돼요. 실제로 없는 장소면 이름을 바꿔서 다른 곳으로 써도 돼요(이름은 아래 저장 버튼으로 저장).</p>
+    ${list.map((g,i)=>`<div style="margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid #f0f0f0;">
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span style="font-size:18px;">${g.icon||'📍'}</span>
+        <input type="text" class="psName" data-idx="${i}" value="${escAttr(g.name)}" style="flex:1;">
+        <button class="btn ghost sm" style="flex-shrink:0;" onclick="registerPreSpot(${i})">📍 지금 여기로 등록</button>
+      </div>
+      <div id="psStatus${i}" style="font-size:11.5px; margin-top:5px;">${preSpotStatusHtml(g)}</div>
+    </div>`).join('')}<hr class="dashed">`;
 }
 function missionPhotoHtml(){
   const done=getPhotoChallenges(), doneCount=Object.keys(done).length;
@@ -944,6 +1062,7 @@ function checkAdminPass(){ const v=document.getElementById('adminPass').value; i
 function openAdminPanel(){
   const stay=lsGet('stay', STAY_DEFAULT);
   openSheet(`<button class="closeX" onclick="closeModal()">✕</button><h3>⚙️ 설정</h3>
+    ${preSpotsAdminHtml()}
     <label class="field">숙소 이름</label>
     <input type="text" id="stayName" value="${escAttr(stay.name)}" style="margin-bottom:8px;">
     <label class="field">숙소 주소</label>
@@ -982,6 +1101,7 @@ function saveAdmin(){
   };
   lsSet('stay', stay);
   const np=document.getElementById('newPass').value.trim(); if(np) lsSet('admin_pass', np);
+  if(document.querySelector('.psName')) savePreSpots(preSpotsFromPanel()); // 스탬프 위치 이름 변경 저장
   if(firebaseReady){
     db.collection('settings').doc('gangneung_family').set({ stay, updatedAt: Date.now() }, {merge:true}).catch(e=>console.warn("설정 전송 실패", e));
   }
@@ -1023,6 +1143,7 @@ function init(){
         if(snap.exists){
           const data=snap.data();
           if(data.stay) lsSet('stay', data.stay);
+          if(Array.isArray(data.pre_stamp_spots) && data.pre_stamp_spots.length) lsSet('pre_stamp_spots', data.pre_stamp_spots);
           renderAll();
         }
       });
